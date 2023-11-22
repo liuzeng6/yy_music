@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>yy音乐网站</title>
+</head>
+
+<body>
+    <style>
+        li {
+            list-style: none;
+            cursor: pointer;
+            margin: 8px 0px;
+        }
+    </style>
+    <br>
+    &nbsp;&nbsp;<input type="text" id="q">
+    <button id="btn">
+        搜索
+    </button>
+    <br><br>
+    <audio src="" id="ad" controls loop> </audio>
+    <br>
+    <select name="" id="select">
+
+    </select>
+    &nbsp;&nbsp;&nbsp; <button id="clear">清空历史记录</button>
+    <ul id="music_list">
+    </ul>
+    <script src="./js/axios.js"></script>
+
+    <script>
+        let oBtn = document.getElementById("btn");
+        let baseUrl = ``
+        document.getElementById("q").oninput = function () {
+            document.onkeydown = function (ev) {
+                if (ev.key == 'Enter') {
+                    oBtn.onclick()
+                }
+            }
+        }
+        oSelect = document.getElementById("select");
+        oSelect.onchange = function () {
+            document.getElementById('q').value = this.value;
+            oBtn.onclick();
+        }
+
+        records = localStorage.records || '[]';
+        records = JSON.parse(records)
+        function createRecord() {
+            oSelect.innerHTML = ''
+            list = [...records].reverse()
+            list.forEach(el => {
+                oSelect.innerHTML += `<option value="${el}">${el}</option>`
+            })
+        }
+
+
+        oBtn.onclick = async function () {
+            oBtn.disabled = true
+            let q = document.getElementById("q").value;
+            if (q == '') {
+                alert("请输入关键字")
+                return;
+            }
+            let url = `${baseUrl}/search/${q}`;
+            let { data } = await axios(url);
+            console.log(data);
+            let music_list = document.getElementById("music_list");
+            music_list.innerHTML = '';
+            if (data.length == 0) {
+                alert("没有找到歌曲")
+            }
+            data.forEach(el => {
+                music_list.innerHTML += `
+                <li data-id ='${el.id}' title = '播放' style="display: inline-block;" ><span>${el.song}</span> --- <span>${el.singer}</span></li><br>
+                `
+            })
+            Array.from(document.getElementById("music_list").children).forEach(element => {
+                element.onclick = function () {
+                    Array.from(element.parentElement.children).forEach(el => { el.style.color = '' })
+                    element.style.color = "red"
+                    play(element.dataset.id)
+                }
+            })
+            if (records.includes(q)) {
+                records = records.filter(el => q != el);
+            }
+            records.push(q);
+            localStorage.setItem("records", JSON.stringify(records))
+            createRecord()
+
+            oBtn.disabled = false
+        }
+        async function play(id) {
+            let { data } = await axios(`${baseUrl}/play_url/${id}`);
+            console.log(data);
+            if (data.code == 1) {
+
+                let { url } = data.data
+                let ad = document.getElementById("ad")
+                ad.src = url;
+                try {
+                    await ad.play()
+                } catch (e) {
+                    alert("暂时不支持播放该歌曲")
+                }
+            } else {
+                alert("暂时不支持播放该歌曲")
+            }
+        }
+        document.getElementById("clear").onclick = function () {
+            localStorage.clear();
+            records = []
+            createRecord();
+        }
+        document.onkeydown = function (ev) {
+            if (ev.ctrlKey && ev.key == "x") {
+                document.getElementById("music_list").children[0].dispatchEvent(new Event("click"))
+                return false
+            }
+            if (ev.key == " ") {
+                ad.paused ? ad.play() : ad.pause()
+                console.log(ad.paused);
+                return false
+            }
+            if (ev.ctrlKey && ev.key == "f") {
+                document.getElementById('q').focus()
+                return false
+            }
+        }
+        createRecord();
+        if (oSelect.children.length != 0) oSelect.onchange()
+    </script>
+</body>
+
+</html>
