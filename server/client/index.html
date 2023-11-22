@@ -9,12 +9,57 @@
 
 <body>
     <style>
+        * {
+            padding: 0px;
+            margin: 0px;
+            list-style: none;
+        }
+
         li {
             list-style: none;
             cursor: pointer;
             margin: 8px 0px;
         }
+
+        /* #container {
+            position: relative;
+            height: 60px;
+            overflow: hidden;
+        }
+
+        #lrc {
+            height: 60px;
+            position: absolute;
+        }
+
+        #lrc li {
+            height: 20px;
+            margin: 10px 0px;
+        } */
+
+        /* #lrc :nth-child(1) {
+            color: #0078D4
+        }
+
+        #lrc :nth-child(2) {
+            color: #CDCDCD
+        } */
+
+        body {
+            text-align: center;
+        }
     </style>
+    <div id="container">
+        <ul id="lrc">
+            <!-- <li>躲鞘里难解难分</li>
+            <li>迎曙色独上凉舟是我还在等</li>
+            <li>迎曙色独上凉舟是我还在等</li>
+            <li>迎曙色独上凉舟是我还在等</li>
+            <li>迎曙色独上凉舟是我还在等</li>
+            <li>迎曙色独上凉舟是我还在等</li>
+            <li>迎曙色独上凉舟是我还在等</li> -->
+        </ul>
+    </div>
     <br>
     &nbsp;&nbsp;<input type="text" id="q">
     <button id="btn">
@@ -57,7 +102,6 @@
             })
         }
 
-
         oBtn.onclick = async function () {
             oBtn.disabled = true
             let q = document.getElementById("q").value;
@@ -96,11 +140,48 @@
         }
         async function play(id) {
             let { data } = await axios(`${baseUrl}/play_url/${id}`);
+            let ad = document.getElementById("ad")
             console.log(data);
-            if (data.code == 1) {
 
+            //歌词部分
+            lrcList = data.lrc;
+            let offset = 0
+            let cur = lrcList[offset].ly
+            let timer = null
+            ad.onplay = function () {
+                timer = null
+                timer = setInterval(() => {
+                    if (ad.currentTime > (lrcList[offset]?.second)) {
+                        cur = lrcList[offset].ly
+                        let next = lrcList[offset + 1]?.ly || ' '
+                        offset++
+
+                        document.getElementById("lrc").innerHTML = `<li>${cur}<li><li>${next}</li>`
+                    }
+                }, 50)
+            }
+
+            ad.onpause = function () {
+                clearInterval(timer)
+            }
+
+            ad.addEventListener("seeked", function () {
+                if (ad.currentTime == 0) { offset = 0; return; };
+                for (let i = 0; i < lrcList.length; i++) {
+                    if (ad.currentTime > lrcList[i].second && ad.currentTime < lrcList[i + 1]?.second) {
+                        offset = i;
+                        return;
+                    }
+                }
+            })
+
+
+
+
+
+
+            if (data.code == 1) {
                 let { url } = data.data
-                let ad = document.getElementById("ad")
                 ad.src = url;
                 try {
                     await ad.play()

@@ -1,4 +1,3 @@
-const fs = require("fs/promises");
 const { JSDOM } = require("jsdom");
 
 module.exports = (data) => {
@@ -12,6 +11,5 @@ module.exports = (data) => {
             singer: el.children[1].innerHTML.replace(/\s/g, '')
         }
     })
-    // console.log(result);
     return result;
 }
