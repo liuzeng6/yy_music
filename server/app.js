@@ -4,7 +4,7 @@ const parseMusicList = require("./parseMusicList");
 const static = require("express-static");
 const parseLyrics = require("./parseLyrics");
 let app = express();
-let port = process.env[2] || 8080;
+let port = process.argv[2] || 8080;
 
 app.all("*", async (req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");

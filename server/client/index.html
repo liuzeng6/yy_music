@@ -21,29 +21,38 @@
             margin: 8px 0px;
         }
 
-        /* #container {
+        #container {
             position: relative;
             height: 60px;
             overflow: hidden;
         }
 
         #lrc {
-            height: 60px;
+            transition: 200ms all ease;
+            width: 100%;
             position: absolute;
         }
 
         #lrc li {
             height: 20px;
             margin: 10px 0px;
-        } */
+        }
 
-        /* #lrc :nth-child(1) {
+        .cur {
             color: #0078D4
         }
 
-        #lrc :nth-child(2) {
+        .next {
             color: #CDCDCD
-        } */
+        }
+
+        #shadow {
+            width: 100%;
+            position: absolute;
+            bottom: 0;
+            height: 33%;
+            background: linear-gradient(180deg, hsla(0, 0%, 100%, 0) 0, hsla(0, 0%, 100%, .8));
+        }
 
         body {
             text-align: center;
@@ -51,14 +60,8 @@
     </style>
     <div id="container">
         <ul id="lrc">
-            <!-- <li>躲鞘里难解难分</li>
-            <li>迎曙色独上凉舟是我还在等</li>
-            <li>迎曙色独上凉舟是我还在等</li>
-            <li>迎曙色独上凉舟是我还在等</li>
-            <li>迎曙色独上凉舟是我还在等</li>
-            <li>迎曙色独上凉舟是我还在等</li>
-            <li>迎曙色独上凉舟是我还在等</li> -->
         </ul>
+        <div id="shadow"></div>
     </div>
     <br>
     &nbsp;&nbsp;<input type="text" id="q">
@@ -116,6 +119,7 @@
             music_list.innerHTML = '';
             if (data.length == 0) {
                 alert("没有找到歌曲")
+                return;
             }
             data.forEach(el => {
                 music_list.innerHTML += `
@@ -124,8 +128,8 @@
             })
             Array.from(document.getElementById("music_list").children).forEach(element => {
                 element.onclick = function () {
-                    Array.from(element.parentElement.children).forEach(el => { el.style.color = '' })
-                    element.style.color = "red"
+                    Array.from(element.parentElement.children).forEach(el => { el.style.fontWeight = '500' })
+                    element.style.fontWeight = "700"
                     play(element.dataset.id)
                 }
             })
@@ -138,6 +142,7 @@
 
             oBtn.disabled = false
         }
+        let timer = null
         async function play(id) {
             let { data } = await axios(`${baseUrl}/play_url/${id}`);
             let ad = document.getElementById("ad")
@@ -145,18 +150,34 @@
 
             //歌词部分
             lrcList = data.lrc;
-            let offset = 0
-            let cur = lrcList[offset].ly
-            let timer = null
+            let offset = 0;
+            const H = 30;
+            let lrc = document.getElementById("lrc");
+            lrc.innerHTML = '';
+            lrcList.forEach(el => {
+                lrc.innerHTML += `<li>${el.ly}</li>`
+            })
+            let next = 1;
+            lrc.children[offset].className = 'cur'
+            lrc.children[next].className = 'next'
             ad.onplay = function () {
+                // console.log("play");
+                // console.log(offset);
                 timer = null
                 timer = setInterval(() => {
                     if (ad.currentTime > (lrcList[offset]?.second)) {
-                        cur = lrcList[offset].ly
-                        let next = lrcList[offset + 1]?.ly || ' '
-                        offset++
 
-                        document.getElementById("lrc").innerHTML = `<li>${cur}<li><li>${next}</li>`
+                        lrc.style.top = - (H * offset) + "px"
+                        Array.from(lrc.children).forEach(el => {
+                            el.className = '';
+                        })
+                        next = next == lrcList.length ? offset : offset + 1;
+                        lrc.children[next].className = 'next'
+                        lrc.children[offset].className = 'cur'
+
+                        // console.log(offset);
+                        // console.log(lrc.style.top);
+                        offset++
                     }
                 }, 50)
             }
@@ -166,6 +187,8 @@
             }
 
             ad.addEventListener("seeked", function () {
+                // console.log("seeked");
+                // console.log(ad.currentTime);
                 if (ad.currentTime == 0) { offset = 0; return; };
                 for (let i = 0; i < lrcList.length; i++) {
                     if (ad.currentTime > lrcList[i].second && ad.currentTime < lrcList[i + 1]?.second) {
@@ -174,8 +197,6 @@
                     }
                 }
             })
-
-
 
 
 
@@ -199,16 +220,18 @@
         }
         document.onkeydown = function (ev) {
             if (ev.ctrlKey && ev.key == "x") {
-                document.getElementById("music_list").children[0].dispatchEvent(new Event("click"))
+                console.log('x');
+                document.getElementById("music_list").children[0].onclick()
                 return false
             }
             if (ev.key == " ") {
                 ad.paused ? ad.play() : ad.pause()
-                console.log(ad.paused);
+                console.log(ad.pause);
                 return false
             }
             if (ev.ctrlKey && ev.key == "f") {
                 document.getElementById('q').focus()
+                // document.getElementById('q')
                 return false
             }
         }
