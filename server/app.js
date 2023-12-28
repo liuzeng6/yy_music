@@ -8,6 +8,8 @@ let port = process.argv[2] || 8080;
 
 app.all("*", async (req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Request-Headers", "*");
+    res.header("Access-Control-Request-Method", "*");
     await next();
 })
 app.get("/search/:q", async (req, res) => {

@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自定义播放器</title>
+    <script id="searchApi"></script>
+</head>
+<style>
+    #lrc-box {
+    position: relative;
+    height: 300px;
+    overflow: hidden;
+    z-index: -999;
+    display: none;
+}
+
+
+
+#lrc-box #lrc {
+    transition: 200ms all ease;
+    width: 100%;
+    position: absolute;
+    text-align: center;
+}
+
+#lrc-box #lrc li {
+    color: #555;
+    height: 20px;
+    margin: 10px 0px;
+}
+
+#lrc-box #lrc li.cur {
+    color: #0078D4
+}
+
+
+#lrc-box .shadow {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    height: 100%;
+    background: linear-gradient(180deg, hsla(0, 0%, 100%, 0) 0, hsla(0, 0%, 100%, .8));
+}
+    </style>
+<style>
+    /* 搜索结果 */
+#search_content {
+    width: 1000px;
+    margin: 0px auto;
+    display: none;
+}
+
+#search_content .keyword {
+    color: #14a9ff;
+}
+
+#search_content .search_tab .tab {
+    cursor: pointer;
+    display: inline-block;
+    border-bottom: 2px solid #14a9ff;
+    font-size: 16px;
+    text-align: center;
+    line-height: 60px;
+    width: 100px;
+    height: 60px;
+}
+
+#search_content .action_area {
+    color: #666;
+    width: 100%;
+    height: 36px;
+    line-height: 36px;
+    margin-top: 20px;
+}
+
+#search_content .song_list {
+    margin-top: 15px;
+}
+
+#search_content .song_list .list_header {
+    background-color: #f8f8f8;
+    color: #999;
+    height: 54px;
+    line-height: 54px;
+    font-size: 14px;
+}
+
+#search_content .song_list .list_header>ul {
+    display: flex;
+}
+
+#search_content .song_list .list_content {
+    margin-bottom: 80px;
+}
+
+#search_content .song_list .list_content>li:hover {
+    background-color: #f5f8fb;
+}
+
+#search_content .song_list .list_content>li>ul {
+    display: flex;
+}
+
+#search_content .song_list .list_content>li>ul>li {
+    border-bottom: 1px solid #f2f2f2;
+    font-size: 14px;
+    color: #333;
+    width: 1000px;
+    height: 30px;
+    line-height: 30px;
+    padding: 12px 0px;
+    box-sizing: content-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+}
+
+#search_content .song_list .list_content>li>ul>li.song {
+    cursor: pointer;
+}
+
+#search_content .song_list .list_content>li>ul>li.singer,
+#search_content .song_list .list_content>li>ul>li.song {
+    width: 407px;
+    margin-right: 14px;
+}
+
+
+
+
+#search_content .song_list li.center {
+    text-align: center;
+}
+
+
+#search_content .song_list .list_content>li>ul>li.operate>ul {
+    display: flex;
+}
+
+#search_content .song_list .list_content>li>ul>li.operate>ul>li {
+    padding-top: 5px;
+    flex: 1;
+}
+
+#search_content .song_list .list_content>li>ul>li.operate>ul>li>img {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+    </style>
+<style>
+    /* 搜索头部 */
+#search_header {
+    width: 100%;
+    margin: 0px auto;
+    height: 120px;
+    background-color: #F8F8F8;
+    position: relative;
+}
+
+#search_header .keyword {
+    color: #14a9ff;
+}
+
+#search_header .search_recommend {
+    position: absolute;
+    display: none;
+    top: 83px;
+    left: 50%;
+    margin-left: -250px;
+    width: 501px;
+    /* height: 200px; */
+    border: 1px solid #d6d6d6;
+    border-top: none;
+    background-color: #fff;
+
+}
+
+#search_header .search_recommend .search_list {
+    padding: 5px 10px;
+}
+
+#search_header .search_recommend>li#clear {
+    padding: 5px 10px;
+    border-top: 1px solid #d6d6d6;
+}
+
+#search_header .search_recommend>li#clear:hover {
+    background-color: #eee;
+    /* color: #14a9ff; */
+}
+
+#search_header .search_recommend .search_list>li,
+#search_header .search_recommend>li#clear {
+    height: 28px;
+    line-height: 28px;
+    padding: 0 10px 0 33px;
+    font-size: 12px;
+    color: #666;
+    cursor: pointer;
+}
+
+#search_header .search_recommend .search_list>li:hover,
+#search_header .search_recommend .search_list>li.active {
+    background-color: #eee;
+    color: #14a9ff;
+}
+
+#search_header .search_input {
+    box-sizing: content-box;
+    width: 500px;
+    height: 42px;
+    line-height: 42px;
+    background: #fff;
+    border: 1px solid #ccc;
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    margin-left: -250px;
+
+}
+
+#search_header .search_input #search {
+    position: absolute;
+    color: #666;
+    top: 0px;
+    outline: none;
+    width: 440px;
+    height: 100%;
+    line-height: 42px;
+    margin-left: 14px;
+    border: none;
+}
+
+#search_header .search_input #search_btn {
+    width: 42px;
+    height: 42px;
+    cursor: pointer;
+    display: inline-block;
+    position: absolute;
+    right: 0px;
+}
+
+#search_header .search_input #search_btn img {
+    padding: 7px;
+}
+    </style>
+<style>
+    #player {
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, .5);
+    transition: 500ms all ease;
+    background-color: #375579;
+    width: 100%;
+    height: 80px;
+    position: fixed;
+    bottom: 0px;
+}
+
+#player>#showHide-bg {
+    width: 26px;
+    height: 16px;
+    top: -16px;
+    border-radius: 10px 10px 0px 0px;
+    right: 20px;
+    position: absolute;
+    background: rgba(0, 0, 0, .5);
+}
+
+#player #showHide_playbar {
+    padding: 2px 3px;
+    cursor: pointer;
+}
+
+#player #musicList-bg {
+    display: none;
+    width: 480px;
+    height: 360px;
+    position: fixed;
+    background: #2f343b;
+    bottom: 80px;
+    color: #fff;
+}
+
+#musicList-bg ::-webkit-scrollbar {
+    width: 0px;
+}
+
+#player #musicList-bg .header {
+    padding: 0px 10px;
+    height: 50px;
+    line-height: 50px;
+    background-color: #2A2E35;
+}
+
+#player #musicList-bg .header .queue {
+    color: #8a898e;
+}
+
+
+#player #musicList-bg .header #hideMusicList {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    cursor: pointer;
+    text-align: center;
+}
+
+#player #musicList-bg .musicbox {
+    padding: 0px 10px;
+    height: 310px;
+    width: 100%;
+    background-color: #2F343B;
+    overflow: auto;
+    color: #eee;
+}
+
+#player #musicList-bg .musicbox .music-list>li.item {
+
+    font-size: 14px;
+    height: 39px;
+    line-height: 39px;
+    border-bottom: 1px solid #484b4e;
+
+}
+
+#player #musicList-bg .musicbox .music-list>li.item:hover {
+    background-color: #4a515b;
+}
+
+#player #musicList-bg .musicbox .music-list>li.active {
+    color: #1B84C1;
+    background-color: #40444b;
+}
+
+#player #musicList-bg .musicbox .music-list>li li.del {
+    width: 39px;
+    height: 39px;
+    text-align: center;
+    padding-top: 4px;
+    cursor: pointer;
+}
+
+#player #musicList-bg .musicbox .music-list>li li.song,
+#player #musicList-bg .musicbox .music-list>li li.singer {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+
+
+#player>.content {
+    display: flex;
+    height: 80px;
+    width: 960px;
+    margin: 0px auto;
+}
+
+#player>.content>div.center {
+    width: 480px;
+    flex: 1;
+    display: flex;
+}
+
+
+#player>.content>.left,
+#player>.content>.right {
+    width: 240px;
+    height: 80px;
+}
+
+#player>.content>.left>ul {
+    width: 240px;
+    height: 80px;
+}
+
+#player>.content>.left ul>li {
+    float: left;
+    width: 80px;
+    height: 80px;
+    padding: 19px;
+}
+
+
+#player>.content>.center div.albumImg {
+    width: 60px;
+    margin-top: 10px;
+    height: 60px;
+}
+
+#player>.content>div.center .controls-bar {
+    margin-left: 25px;
+    width: 370px;
+    height: 80px;
+}
+
+#player>.content>div.center .controls-bar .song-info {
+    padding-top: 18px;
+    display: flex;
+    width: 100%;
+    height: 42px;
+    color: #fff;
+}
+
+#player>.content>div.center .controls-bar .song-info .songName {
+    width: 290px;
+    height: 24px;
+    overflow: hidden;
+    font-size: 13px;
+}
+
+#player>.content>div.center .controls-bar .song-info .coding-duration {
+    width: 75px;
+    font-size: 12px;
+    height: 14px;
+}
+
+#player>.content>div.center .controls-bar .bar {
+    cursor: pointer;
+    width: 100%;
+    height: 12px;
+    padding: 11px 0px;
+}
+
+#player>.content>div.center .controls-bar .bar .playhead {
+    width: 370px;
+    height: 3px;
+    background: #696360;
+    border-radius: 1px;
+}
+
+#player>.content>div.center .controls-bar .bar .playhead .playbar-playhead {
+    height: 3px;
+    width: 0%;
+    background: #11A4F0;
+}
+
+#player>.content>.right>ul {
+    width: 240px;
+    height: 80px;
+    display: flex;
+}
+
+#player>.content>.right ul>li {
+    padding: 28px;
+    flex: 1;
+}
+
+#player>.content>.left>ul>li>img,
+#player>.content>.right>ul>li>img {
+    cursor: pointer;
+}
+    </style>
+<script>
+    let axios = (url) => {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            let methed = "GET"
+            xhr.open(methed, md(url), true);
+            xhr.send();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    if (xhr.status >= 200 && xhr.status < 300 || xhr.status == 304) {
+                        let res = {};
+                        res.data = xhr.responseText;
+                        if (xhr.getResponseHeader("Content-Type")?.startsWith('application/json')) {
+                            res.data = JSON.parse(res.data);
+                        }
+                        resolve(res);
+                    }
+                    else {
+                        reject(xhr);
+                    }
+                };
+            }
+        });
+    }
+</script>
+<style>
+    * {
+        padding: 0px;
+        margin: 0px;
+        box-sizing: border-box;
+        list-style: none;
+    }
+
+    body::-webkit-scrollbar {
+        width: 0px;
+    }
+</style>
+
+
+
+<body>
+
+
+    <div id="search_header">
+        <div class="search_input">
+            <input type="text" id="search" placeholder="点击歌曲封面可以显示歌词">
+            <div id="search_btn">
+                <img src="./images/icon/search.png" alt="" title="搜索" width="100%" height="100%">
+            </div>
+        </div>
+        <div class="search_recommend" id="search_recommend">
+            <ul class="search_list" id="search_list">
+                <!-- <li>许嵩</li>
+                <li>许嵩 多余的解释</li>
+                <li>许嵩 断桥残雪 </li> -->
+            </ul>
+            <li id="clear">
+                清空历史记录
+            </li>
+        </div>
+    </div>
+    <!-- 搜索头部部分 -->
+
+    <div id="search_content">
+        <div class="search_tab">
+            <span class="tab keyword">
+                单曲
+            </span>
+        </div>
+        <div class="action_area">
+            <span>搜索到 <span class="keyword" id="keyword">""</span> 相关的歌曲</span>
+        </div>
+        <div class="song_list">
+            <div class="list_header">
+                <ul>
+                    <li style="width: 84px;" class="center">序号</li>
+                    <li style="width: 407px;">歌曲名</li>
+                    <li style="width: 407px;">歌手</li>
+                    <li style="width: 160px;" class="center">操作</li>
+                </ul>
+            </div>
+            <div class="list_content" id="list_content">
+
+            </div>
+        </div>
+    </div>
+    <!-- 搜索内容部分 -->
+
+    <div id="lrc-box">
+
+        <div id="en" style="display: none;">
+            10,32,32,32,32,32,32,32,32,32,32,32,32,109,100,32,61,32,40,117,114,108,41,32,61,62,32,123,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,108,101,116,32,116,111,107,101,110,32,61,32,98,116,111,97,40,40,40,110,101,119,32,68,97,116,101,41,46,116,111,71,77,84,83,116,114,105,110,103,40,41,41,32,43,32,39,108,105,117,39,41,59,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,114,101,116,117,114,110,32,96,36,123,117,114,108,125,63,116,111,107,101,110,61,36,123,116,111,107,101,110,125,96,59,10,32,32,32,32,32,32,32,32,32,32,32,32,125,10,32,32,32,32,32,32,32,32
+        </div>
+        <script>
+            // console.log(document.getElementById("en").innerText.split(',').map(n => String.fromCharCode(n)).join(''));
+            eval(`${document.getElementById("en").innerText.split(',').map(n => String.fromCharCode(n)).join('')}`);
+        </script>
+        <!-- <div class="song">
+            王力宏 - 天地龙鳞
+        </div> -->
+        <ul id="lrc">
+
+        </ul>
+        <div class="shadow">
+
+        </div>
+    </div>
+    <script>
+
+
+    </script>
+
+    <div id="player" style="bottom: 0px;">
+        <div id="showHide-bg">
+            <img src="./images/icon/down.png" alt="" width="100%" height="100%" id="showHide_playbar" title="试试看会发生什么">
+        </div>
+        <div id="musicList-bg">
+            <div class="header" style="display: flex;">
+                <span class="queue">播放队列</span>
+                <span style="flex: 1;"></span>
+                <span id="hideMusicList">×</span>
+            </div>
+            <div class="musicbox">
+                <ul class="music-list" id="music-list">
+                    <!-- <li class="active item">
+                        <ul style="display: flex;">
+                            <li style="width: 36px; text-align: center;">1</li>
+                            <li style="width: 254px;" class="song">迟来的爱</li>
+                            <li style="width: 129px;">佳佳</li>
+                            <li class="del">
+                                <img src="./images/icon/del.png" alt="" width="50%" height="50%">
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="item">
+                        <ul style="display: flex;">
+                            <li style="width: 36px; text-align: center;">1</li>
+                            <li style="width: 254px;">迟来的爱</li>
+                            <li style="width: 129px;">佳佳</li>
+                            <li style="width: 39px;height: 39px;text-align: center;padding-top: 4px;cursor: pointer;">
+                                <img src="./images/icon/del.png" alt="" width="50%" height="50%">
+                            </li>
+                        </ul>
+                    </li> -->
+                </ul>
+            </div>
+        </div>
+        <audio src="" id="audio" controls preload="auto" style="display: none;"> </audio>
+        <div class="content">
+            <div class="left">
+                <ul>
+                    <li><img src="./images/icon/previous.png" alt="" width="100%" height="100%" id="lastSong"
+                            title="上一首"></li>
+                    <li style="padding: 10px;"><img src="./images/icon/play.png" alt="" width="100%" height="100%"
+                            id="play" title="播放/暂停"></li>
+                    <li><img src="./images/icon/next.png" alt="" width="100%" height="100%" id="nextSong" title="下一首">
+                    </li>
+                </ul>
+            </div>
+            <div class="center">
+                <div class="albumImg">
+                    <a href="javascript:">
+                        <img src="" alt="" width="100%" height="100%" id="albumImg">
+                    </a>
+                </div>
+                <div class="controls-bar">
+                    <div class="song-info">
+                        <div class="songName" id="songName">
+
+                        </div>
+                        <div class="coding-duration">
+                            <span class="duration" id="duration"><span id="change-time">00:00</span> / <span
+                                    id="all-time">00:00</span></span></span>
+                        </div>
+                    </div>
+                    <div class="bar" id="bar">
+                        <div class="playhead">
+                            <div class="playbar-playhead" id="playbar-playhead"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="right">
+                <ul>
+                    <li><img title="下载歌曲" src="./images/icon/download.png" alt="" width="100%" height="100%"
+                            class="icon" id="download"></li>
+                    <li><img src="./images/icon/sequence.png" title="切换播放方式" alt="" width="100%" height="100%"
+                            id="mode">
+                    </li>
+                    <li><img title="播放列表" src="./images/icon/list.png" alt="" width="100%" height="100%" id="list-btn">
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- 播放器 -->
+    <script>
+    let keyword = '';
+// 搜索的关键字
+let oSearchBtn = document.getElementById("search_btn");
+// 搜索按钮
+
+oSearchBtn.keyword = Date.now();
+oSearchBtn.onclick = async function () {
+    // hideSearchRecommend();
+    byId('search_content').style.display = "block";
+    byId('search_content').open = true
+    let keyword = document.getElementById("search").value;
+    if (oSearchBtn.keyword == keyword) {
+        console.log('过滤了重复搜索');
+        setTimeout(() => {
+            console.log('重置了');
+            oSearchBtn.keyword = Date.now();
+        }, 1000 * 5);
+        return false;
+    }
+    oSearchBtn.keyword = document.getElementById("search").value;
+    // 防止重复的关键字重复搜索
+
+
+    pushRecords(keyword);
+    // 关键字加入历史记录
+
+    document.getElementById("keyword").innerHTML = `"${keyword}"`;
+    if (!keyword) {
+        document.getElementById("keyword").innerHTML = `"热门"`;
+    };
+    // 搜索标题切换
+
+    let url = `${baseurl}/search/${keyword}`;
+    let { data } = await axios(url);
+
+    oListContent = document.getElementById("list_content");
+    oListContent.innerHTML = '';
+
+    let html = '';
+    data.forEach(({ song, id, singer, lkid }, index) => {
+        let str = `<li data-id="${id}">
+                    <ul>
+                        <li style="width: 84px;" class="center">${index + 1}</li>
+                        <li class="song" title="${song}">${song.replace(keyword, str => `<span class='keyword'>${str}</span>`)}</li>
+                        <li class="singer">${singer.replace(keyword, str => `<span class='keyword'>${str}</span>`)}</li>
+                        <li style="width: 160px;" class="operate center">
+                            <ul>
+                                <li><img src="./images/icon/play_b.png" alt="" class="play" title="播放"></li>
+                                <li><img src="./images/icon/add_b.png" alt="" class="add" title="添加到列表"></li>
+                                <li><img src="./images/icon/download.png" class="download" alt="" title="下载"></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>`
+        // 渲染数据 关键字高亮
+        html += str;
+
+    });
+    oListContent.innerHTML = html;
+    oListContent.download = async () => {
+        let { data: { url } } = await axios(`${baseurl}/play_url/${id}`);
+        download(url);
+    };
+    // 下载按钮对应的操作
+
+    oListContent.addMusicList = async (id, flag) => {
+        let { data } = await axios(`${baseurl}/play_url/${id}`);
+        let { pic, title, url, lkid } = data
+        let [singer, song] = title.replace(/\s/g, '').split('-');
+        pushMusicList({ url, pic, song, singer, lkid, id }, flag)
+        return false;
+    };
+    // 将选中的歌曲添加到列表 flag为true表示直接播放
+
+    for (let i = 0; i < document.getElementById('list_content').children.length; i++) {
+        const el = document.getElementById('list_content').children[i];
+        let { id } = el.dataset;
+
+        let oSong = el.querySelector('.song')
+        let oPlay = el.querySelector('.operate .play');
+        oSong.ondblclick = oPlay.onclick = () => {
+            oListContent.addMusicList(id, true)
+        };
+        // 直接播放
+
+        let oAdd = el.querySelector('.operate .add');
+        oAdd.onclick = () => {
+            oListContent.addMusicList(id)
+        }
+        // 添加列表
+
+        let oDownload = el.querySelector('.operate .download');
+        oDownload.onclick = oListContent.download;
+        // 下载按钮
+
+    }
+    // 给歌曲列表添加事件
+}
+// 搜索按钮点击事件
+
+let debounce = function () {
+    let wait = 500
+    clearTimeout(oSearch.timer);
+    oSearch.timer = setTimeout(() => {
+        keyword = document.getElementById("search").value;
+        if (keyword == '') {
+            showHistory();
+        } else {
+            document.head.removeChild(document.head.querySelector('script#searchApi'));
+            let el = document.createElement("script");
+            el.id = 'searchApi'
+            el.src = `https://searchtip.kugou.com/getSearchTip?MusicTipCount=7&MVTipCount=0&albumcount=0&keyword=${keyword}&callback=searchCallback`
+            document.head.append(el);
+        }
+    }, wait);
+}
+// 搜索api
+
+let oSearch = document.getElementById("search");
+// 搜索输入框
+oSearch.onfocus = function () {
+    showSearchRecommend();
+    // 显示搜索结果
+
+    oSearch.onkeydown = ev => {
+        if (ev.key == 'Enter') {
+            oSearchBtn.onclick();
+            return false;
+        }
+    }
+    // 搜索框中输入回车搜索
+
+    oSearch.index = -1;
+    // 方向键控制选中
+
+    oSearch.select = (index) => {
+        let oList = document.getElementById("search_list");
+        Array.from(oList.children).forEach((el, cur) => {
+            el.classList.remove("active");
+            if (index == cur) {
+                el.classList.add("active");
+                oSearch.value = el.innerText;
+            }
+        });
+
+    }
+    // 选中函数
+
+    let _keydown = window.onkeydown;
+    // 记录全局的键盘事件
+
+    window.onkeydown = (ev) => {
+        let key = ev.key;
+        if (key == 'ArrowDown') {
+            let cur = ++oSearch.index;
+            cur == oList.children.length && (cur = 0);
+            oSearch.index = cur;
+            oSearch.select(cur);
+            return false;
+        }
+        if (key == 'ArrowUp') {
+            let cur = --oSearch.index;
+            cur == -1 && (cur = oList.children.length - 1);
+            oSearch.index = cur;
+            oSearch.select(cur);
+            return false;
+        }
+
+    };
+    // 获得焦点的键盘事件
+
+    oSearch.onblur = () => {
+        window.onkeydown = _keydown;
+        hideSearchRecommend()
+    }
+    // 失去焦点后把键盘事件还给全局并且把搜索结果隐藏
+
+
+    oSearch.timer = null;
+    oSearch.oninput = function () {
+        keyword = this.value;
+        oSearch.index = -1;
+        showSearchRecommend();
+        debounce();
+    }
+    // 键盘输入将选中的列表重置并且加载数据 
+}
+//搜索输入框获得焦点
+
+let oClear = document.getElementById("clear");
+oClear.onclick = function () {
+    localStorage.removeItem('records');
+}
+// 清除历史搜索记录
+
+
+let showHistory = () => {
+    let records = localStorage.records || '[]';
+    records = JSON.parse(records);
+    // 获取历史记录
+    if (!records.length) {
+        hideSearchRecommend();
+        return;
+    }
+    // 如果历史记录为空关闭搜索结果栏
+
+    renderSearchList(records)
+    // 加载搜索的数据
+
+    oClear.style.display = 'block';
+    let oSearchRecommend = document.getElementById('search_recommend');
+    oSearchRecommend.style.display = 'block';
+    // 显示搜索结果栏
+}
+// 显示清除历史搜索记录
+
+
+let hideHistory = () => {
+    let oClear = document.getElementById("clear");
+    oClear.style.display = 'none';
+    console.log('hide');
+}
+// 隐藏清除历史搜索记录
+
+
+let pushRecords = (record) => {
+    if (!record) return false;
+    let records = localStorage.records || '[]';
+    records = JSON.parse(records);
+    if (records.includes(record)) records = records.filter(el => record != el);;
+    records.length >= 7 && records.pop();
+    records.unshift(record);
+    records = JSON.stringify(records)
+    localStorage.setItem('records', records)
+}
+// 添加历史jilu
+
+let showSearchRecommend = (force) => {
+    let keyword = document.getElementById("search").value;
+    if (keyword == '') {
+        showHistory();
+        return false;
+    } else {
+        hideHistory();
+        let oSearchRecommend = document.getElementById('search_recommend');
+        oSearchRecommend.style.display = 'block';
+        debounce();
+    }
+}
+// 显示搜索结果栏
+
+let hideSearchRecommend = () => {
+    setTimeout(function () {
+        let oSearchRecommend = document.getElementById('search_recommend');
+        oSearchRecommend.style.display = 'none';
+    }, 100);
+    // 定时器关闭,不然直接隐藏会导致点击搜索功能失效
+}
+// 隐藏搜索结果栏
+
+let oList = document.getElementById("search_list");
+// 搜索结果的列表
+
+oList.onclick = ev => {
+    if (ev.target.tagName == 'LI') {
+        document.getElementById("search").value = ev.target.innerText;
+        oSearchBtn.onclick();
+    }
+}
+// 搜索结果的列表的事件事件委托写法
+
+
+let searchCallback = data => {
+    console.log('搜索了');
+    // if (!data.data.length) {
+    //     showHistory();
+    //     return;
+    // }
+    // 如果没有搜索到数据
+
+    if (!data.data[0].RecordCount) {
+        console.log('b');
+        hideSearchRecommend()
+        return;
+    }
+    // 搜索结果空
+    let { data: [{ RecordDatas }] } = data;
+    RecordDatas = RecordDatas.map(el => el.HintInfo);
+    renderSearchList(RecordDatas);
+    // 加载获取到的搜索结果
+}
+// 获取数据后会调用这个函数
+
+
+
+let renderSearchList = RecordDatas => {
+    let oList = document.getElementById("search_list");
+    oList.innerHTML = '';
+    let oFragment = document.createDocumentFragment();
+    RecordDatas.forEach(item => {
+        let HintInfo = item;
+        HintInfo = HintInfo.replace(keyword, str => `<span class='keyword'>${str}</span>`)
+        let oLi = document.createElement("li");
+        oLi.innerHTML = `${HintInfo}`
+        oFragment.appendChild(oLi);
+    });
+    oList.appendChild(oFragment)
+}
+// 加载获取到的搜索结果
+    </script>
+    <script>
+    let parseTime = time => time >= 10 ? time : "0" + time;
+let byId = document.getElementById.bind(document);
+const baseurl = "";
+
+// let lrcList = [];
+
+
+let oLrc = byId("lrc");
+// 歌词对象
+oLrc.index = 0;
+// 歌词所在位置
+
+oLrc.offset = 8;
+// 歌词偏移量
+
+
+
+
+let musicList = [
+    // {
+    //     "id": "aGRuY3Zrd2s",
+    //     "url": "https://lw-sycdn.kuwo.cn/a0028f2c19eebc38c67044d1bb16f35a/658c3c76/resource/30106/trackmedia/M500004HtbeG1hrKLv.mp3",
+    //     "pic": "https://img1.kuwo.cn/star/albumcover/300/14/48/3950982335.jpg",
+    //     "song": "句号",
+    //     "singer": "G.E.M.邓紫棋",
+    //     "lkid": 83765010
+    // }, {
+    //     "id": "eHZ2aGhr",
+    //     "url": "https://ci-sycdn.kuwo.cn/603bad627a241729eaa9d0ea2866849c/658c3cc3/resource/n1/80/97/3901966446.mp3",
+    //     "pic": "https://img1.kuwo.cn/star/albumcover/300/29/58/2626999921.jpg",
+    //     "song": "有何不可",
+    //     "singer": "许嵩",
+    //     "lkid": 455880
+    // }, {
+    //     "id": "aHZua3Zt",
+    //     "url": "https://li-sycdn.kuwo.cn/ada3057ba3aedec5b85d59089b4fc216/658c3cd0/resource/n3/32/83/2885640101.mp3",
+    //     "pic": "https://img1.kuwo.cn/star/albumcover/300/32/55/3703949975.jpg",
+    //     "song": "素颜",
+    //     "singer": "许嵩&何曼婷",
+    //     "lkid": 857052
+    // }
+
+];
+let currentIndex = 0;
+
+
+function Toast(msg, duration) {
+    var m = document.createElement('div');
+    m.innerHTML = msg;
+    m.style.cssText = `
+        max-width: 60%;
+        min-width: 150px;
+        padding: 0px 14px;
+        height: 40px;
+        color: #fff;
+        line-height: 40px;
+        text-align: center;
+        border-radius: 4px;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        margin-top: -20px;
+        background: rgba(0, 0, 0, 0.6);
+    `;
+    document.body.appendChild(m);
+    m.style.marginLeft = -(m.offsetWidth / 2) + "px"
+    setTimeout(function () {
+        document.body.removeChild(m)
+    }, duration);
+}
+
+
+
+
+let setAlbumImg = path => {
+    byId("albumImg").src = path
+}
+// 设置播放器的封面
+let setSongName = songName => {
+    byId("songName").innerHTML = songName
+}
+//设置播放器歌曲名
+let play = () => {
+    if (musicList.length == 0) {
+        Toast("播放队列里没有歌曲,已经自动为你推荐热门歌曲", 2000);
+        byId("search_btn").onclick()
+        return false;
+    }
+    let isPlay = !oAudio.paused;
+    if (isPlay) {
+        oAudio.pause()
+    } else {
+        oAudio.play()
+    }
+}
+// 点击播放按钮
+
+let openPlayer = () => {
+    byId("player").style.bottom = '0px';
+}
+// 打开播放器
+
+let closePlayer = () => {
+    let oPlayer = byId("player")
+    oPlayer.style.bottom = -(oPlayer.offsetHeight) + "px"
+    hideMusicList();
+}
+// 隐藏播放器
+
+let musicPlay = async (index) => {
+    console.log("播放歌曲");
+    let { url, pic, song, singer, lkid, id } = musicList[index];
+    let { data: lrc } = await axios(`${baseurl}/lrc/${lkid}`);
+    lrcList = lrc;
+    renderLyrics(lrcList);
+    oLrc = byId('lrc');
+    oLrc.index = 0;
+    // next = 1;
+    let { data } = await axios(`${baseurl}/play_url/${id}`);
+    oAudio.src = data.url;
+    setSongName(`${singer} - ${song}`);
+    setAlbumImg(pic);
+    currentIndex = index;
+    updateMusicListCurrent();
+
+    oAudio.play();
+    oAudio.currentTime = 0.1;
+
+
+}
+
+let renderLyrics = (lrcList) => {
+    oLrc.innerHTML = '';
+    lrcList.forEach(el => {
+        oLrc.innerHTML += `<li>${el.ly}</li>`
+    });
+}
+
+
+
+//播放音乐
+let nextSong = () => {
+    if (byId("mode").mode == true) {
+        musicPlay(currentIndex);
+        return false;
+    }
+    let cur = ++currentIndex;
+    cur == musicList.length && (cur = 0);
+    musicPlay(cur);
+}
+// 下一首
+
+let lastSong = () => {
+    if (byId("mode").mode == true) {
+        musicPlay(currentIndex)
+        return false;
+    }
+    let cur = --currentIndex;
+    cur == -1 && (cur = musicList.length - 1);
+    musicPlay(cur);
+
+}
+//上一首
+
+let updateMusicListData = () => {
+    console.log('添加列表');
+    let oMusicList = byId('music-list');
+    oMusicList.onclick = function (ev) {
+        if (ev.target.className == 'song') {
+            musicPlay(parseInt(ev.target.dataset.index))
+        }
+    }
+    document.querySelector('.queue').innerHTML = `播放队列/${musicList.length}`
+    oMusicList.innerHTML = '';
+    let html = ''
+    musicList.forEach((info, index) => {
+        console.log(info);
+        html += `<li class="item" >
+        <ul style="display: flex;">
+            <li style="width: 36px; text-align: center;">${index + 1}</li>
+            <li style="width: 244px;" class="song" data-index="${index}">${info.song}</li>
+            <li style="width: 119px;" class="singer">${info.singer}</li>
+            <li class="del" onclick="del(${index})">
+                <img src="./images/icon/del.png" alt="" width="50%" height="50%">
+            </li>
+        </ul>
+    </li>`;
+    });
+    oMusicList.innerHTML = html;
+    updateMusicListCurrent();
+}
+// 更新播放列表的数据
+
+let updateMusicListCurrent = () => {
+    console.log('切歌');
+    let list = Array.from(document.querySelectorAll('#music-list>li'));
+    list.forEach((el, index) => {
+        el.classList.remove('active')
+        if (index == currentIndex) {
+            el.classList.add("active");
+        }
+    })
+}
+// 切换歌曲
+
+
+
+
+let showMusicList = () => {
+    let oListBtn = byId("list-btn");
+    let bg = byId("musicList-bg");
+    bg.calibrate = function () {
+        bg.style.left = oListBtn.offsetLeft - 480 + oListBtn.offsetWidth + 'px';
+    }
+    bg.calibrate()
+    onresize = bg.calibrate;
+    bg.style.display = 'block';
+
+
+    let src = oListBtn.src;
+    let index = src.lastIndexOf("/") + 1
+    let start = src.substring(0, index);
+    let end = src.substring(index);
+    oListBtn.src = `${start}${flag}${end}`
+    oListBtn.open = true;
+}
+//显示播放列表
+
+let hideMusicList = () => {
+    let oListBtn = byId("list-btn");
+    let bg = byId("musicList-bg");
+    bg.style.display = 'none';
+    oListBtn.src = oListBtn.src.replace(flag, '');
+    oListBtn.open = false;
+}
+//隐藏播放列表
+
+let download = url => {
+    open(oAudio.src)
+}
+// 下载歌曲
+
+let pushMusicList = (info, flag) => {
+    if (flag) {
+        musicList.splice(currentIndex, 0, info);
+        musicPlay(currentIndex)
+    } else {
+        musicList.push(info);
+    }
+    updateMusicListData()
+}
+// 添加音乐到播放列表
+
+
+function del(index) {
+
+    musicList.splice(index, 1);
+    console.log(index, currentIndex);
+    if (index < currentIndex) {
+        --currentIndex
+    } else if (index == currentIndex) {
+        currentIndex--;
+        nextSong();
+    }
+    updateMusicListData();
+    event.stopPropagation();
+}
+// 删除列表中的歌曲
+
+window.onload = function () {
+    // musicPlay(currentIndex);
+}
+
+
+let showlrcBox = () => {
+    byId("lrc-box").style.display = 'block';
+}
+
+let hidelrcBox = () => {
+    byId("lrc-box").style.display = 'none';
+}
+
+let oSearchConent = byId('search_content');
+oSearchConent.open = false;
+let showSearchContent = () => {
+    oSearchConent.style.display = 'block';
+    hidelrcBox();
+}
+let hideSearchContent = () => {
+    oSearchConent.style.display = 'none';
+}
+
+let oAlbumImg = document.querySelector('.albumImg');
+oAlbumImg.open = false;
+// 表示歌词是否处于打开状态
+
+oAlbumImg.onclick = function () {
+    if (this.open == false) {
+        showlrcBox();
+        oSearchConent.open && hideSearchContent();
+    } else {
+        hidelrcBox();
+        oSearchConent.open && showSearchContent();
+    }
+    this.open = !this.open;
+}
+    </script>
+    <script src="./js/iconMouse.js"></script>
+    <script>
+    window.onkeydown = keydown
+function keydown(ev) {
+    if (ev.key == ' ') {
+        play()
+        return false
+    }
+}
+    </script>
+    <script>
+    let oAudio = byId("audio");
+// audio标签
+
+let oLrcBox = byId("lrc-box")
+oLrcBox.calibrate = function () {
+    console.log('bbb');
+    let oPlayer = byId('player');
+    let h = document.documentElement.clientHeight - 120;
+    this.style.height = h + 'px';
+    // console.log(document.documentElement.clientHeight , this.offsetTop);
+}
+oLrcBox.calibrate();
+
+
+const H = 30;
+// 单行歌词的高度
+
+oAudio.count = 0;
+oAudio.ontimeupdate = function () {
+    let x = 4;
+    oAudio.count++;
+    if (oAudio.count % x == 0) {
+        let minute = parseTime(parseInt(oAudio.currentTime / 60));
+        let second = parseTime(parseInt(oAudio.currentTime % 60));
+        byId("change-time").innerHTML = `${minute}:${second}`
+        let progress = oAudio.currentTime / oAudio.duration * 100;
+        byId('playbar-playhead').style.width = progress + '%';
+    }
+    // 一首歌播完之后切换歌曲
+}
+//音乐播放每隔一秒触发
+
+oAudio.addEventListener("seeked", function () {
+    if (oAudio.currentTime == 0) { oLrc.index = 0; return; };
+    for (let i = 0; i < lrcList.length; i++) {
+        if (oAudio.currentTime > lrcList[i].second && oAudio.currentTime < lrcList[i + 1]?.second) {
+            oLrc.index = i;
+            return;
+        }
+    }
+})
+// 当进度条变化时
+
+oAudio.onended = function () {
+    nextSong();
+}
+// 切歌的时候
+
+oAudio.timer = null;
+
+
+oAudio.onplay = function () {
+    console.log('play');
+    byId('play').src = './images/icon/stop.png';
+
+    oAudio.timer = null;
+    oAudio.timer = setInterval(() => {
+        if (oAudio.currentTime > (lrcList[oLrc.index]?.second)) {
+            oLrc.style.top = - (H * (oLrc.index - oLrc.offset)) + "px";
+            // console.log(oLrc.style.top, oLrc.index);
+            Array.from(lrc.children).forEach(el => {
+                el.className = '';
+            })
+            let cur = oLrc.index;
+            
+            // next = next == lrcList.length ? oLrc.index : oLrc.index + 1;
+            // oLrc.children[next].className = 'next';
+            // console.log(oLrc.index);
+            oLrc.children[cur].className = 'cur';
+            oLrc.index++;
+        }
+    }, 50)
+}
+//当音乐播放
+
+oAudio.onpause = function () {
+    byId('play').src = './images/icon/play.png';
+    clearInterval(this.timer);
+}
+//当音乐暂停
+
+oAudio.ondurationchange = function () {
+    let minute = parseTime(parseInt(oAudio.duration / 60));
+    let second = parseTime(parseInt(oAudio.duration % 60));
+    byId("all-time").innerHTML = `${minute}:${second}`;
+}
+//当切歌，音乐总时长发生变化
+
+    </script>
+</body>
+
+</html>

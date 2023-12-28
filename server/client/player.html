@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自定义播放器</title>
+    <script id="searchApi"></script>
+</head>
+<link rel="stylesheet" href="./css/lrc.css">
+<link rel="stylesheet" href="./css/search_content.css">
+<link rel="stylesheet" href="./css/search_header.css">
+<link rel="stylesheet" href="./css/player.css">
+<script>
+    let axios = (url) => {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            let methed = "GET"
+            xhr.open(methed, md(url), true);
+            xhr.send();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    if (xhr.status >= 200 && xhr.status < 300 || xhr.status == 304) {
+                        let res = {};
+                        res.data = xhr.responseText;
+                        if (xhr.getResponseHeader("Content-Type")?.startsWith('application/json')) {
+                            res.data = JSON.parse(res.data);
+                        }
+                        resolve(res);
+                    }
+                    else {
+                        reject(xhr);
+                    }
+                };
+            }
+        });
+    }
+</script>
+<style>
+    * {
+        padding: 0px;
+        margin: 0px;
+        box-sizing: border-box;
+        list-style: none;
+    }
+
+    body::-webkit-scrollbar {
+        width: 0px;
+    }
+</style>
+
+
+
+<body>
+
+
+    <div id="search_header">
+        <div class="search_input">
+            <input type="text" id="search" placeholder="点击歌曲封面可以显示歌词">
+            <div id="search_btn">
+                <img src="./images/icon/search.png" alt="" title="搜索" width="100%" height="100%">
+            </div>
+        </div>
+        <div class="search_recommend" id="search_recommend">
+            <ul class="search_list" id="search_list">
+                <!-- <li>许嵩</li>
+                <li>许嵩 多余的解释</li>
+                <li>许嵩 断桥残雪 </li> -->
+            </ul>
+            <li id="clear">
+                清空历史记录
+            </li>
+        </div>
+    </div>
+    <!-- 搜索头部部分 -->
+
+    <div id="search_content">
+        <div class="search_tab">
+            <span class="tab keyword">
+                单曲
+            </span>
+        </div>
+        <div class="action_area">
+            <span>搜索到 <span class="keyword" id="keyword">""</span> 相关的歌曲</span>
+        </div>
+        <div class="song_list">
+            <div class="list_header">
+                <ul>
+                    <li style="width: 84px;" class="center">序号</li>
+                    <li style="width: 407px;">歌曲名</li>
+                    <li style="width: 407px;">歌手</li>
+                    <li style="width: 160px;" class="center">操作</li>
+                </ul>
+            </div>
+            <div class="list_content" id="list_content">
+
+            </div>
+        </div>
+    </div>
+    <!-- 搜索内容部分 -->
+
+    <div id="lrc-box">
+
+        <div id="en" style="display: none;">
+            10,32,32,32,32,32,32,32,32,32,32,32,32,109,100,32,61,32,40,117,114,108,41,32,61,62,32,123,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,108,101,116,32,116,111,107,101,110,32,61,32,98,116,111,97,40,40,40,110,101,119,32,68,97,116,101,41,46,116,111,71,77,84,83,116,114,105,110,103,40,41,41,32,43,32,39,108,105,117,39,41,59,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,114,101,116,117,114,110,32,96,36,123,117,114,108,125,63,116,111,107,101,110,61,36,123,116,111,107,101,110,125,96,59,10,32,32,32,32,32,32,32,32,32,32,32,32,125,10,32,32,32,32,32,32,32,32
+        </div>
+        <script>
+            // console.log(document.getElementById("en").innerText.split(',').map(n => String.fromCharCode(n)).join(''));
+            eval(`${document.getElementById("en").innerText.split(',').map(n => String.fromCharCode(n)).join('')}`);
+        </script>
+        <!-- <div class="song">
+            王力宏 - 天地龙鳞
+        </div> -->
+        <ul id="lrc">
+
+        </ul>
+        <div class="shadow">
+
+        </div>
+    </div>
+    <script>
+
+
+    </script>
+
+    <div id="player" style="bottom: 0px;">
+        <div id="showHide-bg">
+            <img src="./images/icon/down.png" alt="" width="100%" height="100%" id="showHide_playbar" title="试试看会发生什么">
+        </div>
+        <div id="musicList-bg">
+            <div class="header" style="display: flex;">
+                <span class="queue">播放队列</span>
+                <span style="flex: 1;"></span>
+                <span id="hideMusicList">×</span>
+            </div>
+            <div class="musicbox">
+                <ul class="music-list" id="music-list">
+                    <!-- <li class="active item">
+                        <ul style="display: flex;">
+                            <li style="width: 36px; text-align: center;">1</li>
+                            <li style="width: 254px;" class="song">迟来的爱</li>
+                            <li style="width: 129px;">佳佳</li>
+                            <li class="del">
+                                <img src="./images/icon/del.png" alt="" width="50%" height="50%">
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="item">
+                        <ul style="display: flex;">
+                            <li style="width: 36px; text-align: center;">1</li>
+                            <li style="width: 254px;">迟来的爱</li>
+                            <li style="width: 129px;">佳佳</li>
+                            <li style="width: 39px;height: 39px;text-align: center;padding-top: 4px;cursor: pointer;">
+                                <img src="./images/icon/del.png" alt="" width="50%" height="50%">
+                            </li>
+                        </ul>
+                    </li> -->
+                </ul>
+            </div>
+        </div>
+        <audio src="" id="audio" controls preload="auto" style="display: none;"> </audio>
+        <div class="content">
+            <div class="left">
+                <ul>
+                    <li><img src="./images/icon/previous.png" alt="" width="100%" height="100%" id="lastSong"
+                            title="上一首"></li>
+                    <li style="padding: 10px;"><img src="./images/icon/play.png" alt="" width="100%" height="100%"
+                            id="play" title="播放/暂停"></li>
+                    <li><img src="./images/icon/next.png" alt="" width="100%" height="100%" id="nextSong" title="下一首">
+                    </li>
+                </ul>
+            </div>
+            <div class="center">
+                <div class="albumImg">
+                    <a href="javascript:">
+                        <img src="" alt="" width="100%" height="100%" id="albumImg">
+                    </a>
+                </div>
+                <div class="controls-bar">
+                    <div class="song-info">
+                        <div class="songName" id="songName">
+
+                        </div>
+                        <div class="coding-duration">
+                            <span class="duration" id="duration"><span id="change-time">00:00</span> / <span
+                                    id="all-time">00:00</span></span></span>
+                        </div>
+                    </div>
+                    <div class="bar" id="bar">
+                        <div class="playhead">
+                            <div class="playbar-playhead" id="playbar-playhead"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="right">
+                <ul>
+                    <li><img title="下载歌曲" src="./images/icon/download.png" alt="" width="100%" height="100%"
+                            class="icon" id="download"></li>
+                    <li><img src="./images/icon/sequence.png" title="切换播放方式" alt="" width="100%" height="100%"
+                            id="mode">
+                    </li>
+                    <li><img title="播放列表" src="./images/icon/list.png" alt="" width="100%" height="100%" id="list-btn">
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- 播放器 -->
+    <script src="./js/search.js"></script>
+    <script src="./js/comment.js"></script>
+    <script src="./js/iconMouse.js"></script>
+    <script src="./js/keyboard.js"></script>
+    <script src="./js/player.js"></script>
+</body>
+
+</html>

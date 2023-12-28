@@ -1,0 +1,104 @@
+/* 搜索结果 */
+#search_content {
+    width: 1000px;
+    margin: 0px auto;
+    display: none;
+}
+
+#search_content .keyword {
+    color: #14a9ff;
+}
+
+#search_content .search_tab .tab {
+    cursor: pointer;
+    display: inline-block;
+    border-bottom: 2px solid #14a9ff;
+    font-size: 16px;
+    text-align: center;
+    line-height: 60px;
+    width: 100px;
+    height: 60px;
+}
+
+#search_content .action_area {
+    color: #666;
+    width: 100%;
+    height: 36px;
+    line-height: 36px;
+    margin-top: 20px;
+}
+
+#search_content .song_list {
+    margin-top: 15px;
+}
+
+#search_content .song_list .list_header {
+    background-color: #f8f8f8;
+    color: #999;
+    height: 54px;
+    line-height: 54px;
+    font-size: 14px;
+}
+
+#search_content .song_list .list_header>ul {
+    display: flex;
+}
+
+#search_content .song_list .list_content {
+    margin-bottom: 80px;
+}
+
+#search_content .song_list .list_content>li:hover {
+    background-color: #f5f8fb;
+}
+
+#search_content .song_list .list_content>li>ul {
+    display: flex;
+}
+
+#search_content .song_list .list_content>li>ul>li {
+    border-bottom: 1px solid #f2f2f2;
+    font-size: 14px;
+    color: #333;
+    width: 1000px;
+    height: 30px;
+    line-height: 30px;
+    padding: 12px 0px;
+    box-sizing: content-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+}
+
+#search_content .song_list .list_content>li>ul>li.song {
+    cursor: pointer;
+}
+
+#search_content .song_list .list_content>li>ul>li.singer,
+#search_content .song_list .list_content>li>ul>li.song {
+    width: 407px;
+    margin-right: 14px;
+}
+
+
+
+
+#search_content .song_list li.center {
+    text-align: center;
+}
+
+
+#search_content .song_list .list_content>li>ul>li.operate>ul {
+    display: flex;
+}
+
+#search_content .song_list .list_content>li>ul>li.operate>ul>li {
+    padding-top: 5px;
+    flex: 1;
+}
+
+#search_content .song_list .list_content>li>ul>li.operate>ul>li>img {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}

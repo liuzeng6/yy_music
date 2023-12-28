@@ -1,0 +1,95 @@
+/* 搜索头部 */
+#search_header {
+    width: 100%;
+    margin: 0px auto;
+    height: 120px;
+    background-color: #F8F8F8;
+    position: relative;
+}
+
+#search_header .keyword {
+    color: #14a9ff;
+}
+
+#search_header .search_recommend {
+    position: absolute;
+    display: none;
+    top: 83px;
+    left: 50%;
+    margin-left: -250px;
+    width: 501px;
+    /* height: 200px; */
+    border: 1px solid #d6d6d6;
+    border-top: none;
+    background-color: #fff;
+
+}
+
+#search_header .search_recommend .search_list {
+    padding: 5px 10px;
+}
+
+#search_header .search_recommend>li#clear {
+    padding: 5px 10px;
+    border-top: 1px solid #d6d6d6;
+}
+
+#search_header .search_recommend>li#clear:hover {
+    background-color: #eee;
+    /* color: #14a9ff; */
+}
+
+#search_header .search_recommend .search_list>li,
+#search_header .search_recommend>li#clear {
+    height: 28px;
+    line-height: 28px;
+    padding: 0 10px 0 33px;
+    font-size: 12px;
+    color: #666;
+    cursor: pointer;
+}
+
+#search_header .search_recommend .search_list>li:hover,
+#search_header .search_recommend .search_list>li.active {
+    background-color: #eee;
+    color: #14a9ff;
+}
+
+#search_header .search_input {
+    box-sizing: content-box;
+    width: 500px;
+    height: 42px;
+    line-height: 42px;
+    background: #fff;
+    border: 1px solid #ccc;
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    margin-left: -250px;
+
+}
+
+#search_header .search_input #search {
+    position: absolute;
+    color: #666;
+    top: 0px;
+    outline: none;
+    width: 440px;
+    height: 100%;
+    line-height: 42px;
+    margin-left: 14px;
+    border: none;
+}
+
+#search_header .search_input #search_btn {
+    width: 42px;
+    height: 42px;
+    cursor: pointer;
+    display: inline-block;
+    position: absolute;
+    right: 0px;
+}
+
+#search_header .search_input #search_btn img {
+    padding: 7px;
+}

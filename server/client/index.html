@@ -96,7 +96,7 @@
         }
 
         records = localStorage.records || '[]';
-        records = JSON.parse(records)
+        records = JSON.parse(records);
         function createRecord() {
             oSelect.innerHTML = ''
             list = [...records].reverse()
@@ -174,16 +174,13 @@
                         next = next == lrcList.length ? offset : offset + 1;
                         lrc.children[next].className = 'next'
                         lrc.children[offset].className = 'cur'
-
-                        // console.log(offset);
-                        // console.log(lrc.style.top);
                         offset++
                     }
                 }, 50)
             }
 
             ad.onpause = function () {
-                clearInterval(timer)
+                clearInterval(timer);
             }
 
             ad.addEventListener("seeked", function () {

@@ -1,0 +1,35 @@
+#lrc-box {
+    position: relative;
+    height: 300px;
+    overflow: hidden;
+    z-index: -999;
+    display: none;
+}
+
+
+
+#lrc-box #lrc {
+    transition: 200ms all ease;
+    width: 100%;
+    position: absolute;
+    text-align: center;
+}
+
+#lrc-box #lrc li {
+    color: #555;
+    height: 20px;
+    margin: 10px 0px;
+}
+
+#lrc-box #lrc li.cur {
+    color: #0078D4
+}
+
+
+#lrc-box .shadow {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    height: 100%;
+    background: linear-gradient(180deg, hsla(0, 0%, 100%, 0) 0, hsla(0, 0%, 100%, .8));
+}
