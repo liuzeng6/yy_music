@@ -32,7 +32,7 @@
 }
 
 #lrc-box #lrc li.cur {
-    color: #0078D4
+    color: #0c8def
 }
 
 
@@ -654,317 +654,6 @@
     </div>
     <!-- 播放器 -->
     <script>
-    let keyword = '';
-// 搜索的关键字
-let oSearchBtn = document.getElementById("search_btn");
-// 搜索按钮
-
-oSearchBtn.keyword = Date.now();
-oSearchBtn.onclick = async function () {
-    // hideSearchRecommend();
-    byId('search_content').style.display = "block";
-    byId('search_content').open = true
-    let keyword = document.getElementById("search").value;
-    if (oSearchBtn.keyword == keyword) {
-        console.log('过滤了重复搜索');
-        setTimeout(() => {
-            console.log('重置了');
-            oSearchBtn.keyword = Date.now();
-        }, 1000 * 5);
-        return false;
-    }
-    oSearchBtn.keyword = document.getElementById("search").value;
-    // 防止重复的关键字重复搜索
-
-
-    pushRecords(keyword);
-    // 关键字加入历史记录
-
-    document.getElementById("keyword").innerHTML = `"${keyword}"`;
-    if (!keyword) {
-        document.getElementById("keyword").innerHTML = `"热门"`;
-    };
-    // 搜索标题切换
-
-    let url = `${baseurl}/search/${keyword}`;
-    let { data } = await axios(url);
-
-    oListContent = document.getElementById("list_content");
-    oListContent.innerHTML = '';
-
-    let html = '';
-    data.forEach(({ song, id, singer, lkid }, index) => {
-        let str = `<li data-id="${id}">
-                    <ul>
-                        <li style="width: 84px;" class="center">${index + 1}</li>
-                        <li class="song" title="${song}">${song.replace(keyword, str => `<span class='keyword'>${str}</span>`)}</li>
-                        <li class="singer">${singer.replace(keyword, str => `<span class='keyword'>${str}</span>`)}</li>
-                        <li style="width: 160px;" class="operate center">
-                            <ul>
-                                <li><img src="./images/icon/play_b.png" alt="" class="play" title="播放"></li>
-                                <li><img src="./images/icon/add_b.png" alt="" class="add" title="添加到列表"></li>
-                                <li><img src="./images/icon/download.png" class="download" alt="" title="下载"></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>`
-        // 渲染数据 关键字高亮
-        html += str;
-
-    });
-    oListContent.innerHTML = html;
-    oListContent.download = async () => {
-        let { data: { url } } = await axios(`${baseurl}/play_url/${id}`);
-        download(url);
-    };
-    // 下载按钮对应的操作
-
-    oListContent.addMusicList = async (id, flag) => {
-        let { data } = await axios(`${baseurl}/play_url/${id}`);
-        let { pic, title, url, lkid } = data
-        let [singer, song] = title.replace(/\s/g, '').split('-');
-        pushMusicList({ url, pic, song, singer, lkid, id }, flag)
-        return false;
-    };
-    // 将选中的歌曲添加到列表 flag为true表示直接播放
-
-    for (let i = 0; i < document.getElementById('list_content').children.length; i++) {
-        const el = document.getElementById('list_content').children[i];
-        let { id } = el.dataset;
-
-        let oSong = el.querySelector('.song')
-        let oPlay = el.querySelector('.operate .play');
-        oSong.ondblclick = oPlay.onclick = () => {
-            oListContent.addMusicList(id, true)
-        };
-        // 直接播放
-
-        let oAdd = el.querySelector('.operate .add');
-        oAdd.onclick = () => {
-            oListContent.addMusicList(id)
-        }
-        // 添加列表
-
-        let oDownload = el.querySelector('.operate .download');
-        oDownload.onclick = oListContent.download;
-        // 下载按钮
-
-    }
-    // 给歌曲列表添加事件
-}
-// 搜索按钮点击事件
-
-let debounce = function () {
-    let wait = 500
-    clearTimeout(oSearch.timer);
-    oSearch.timer = setTimeout(() => {
-        keyword = document.getElementById("search").value;
-        if (keyword == '') {
-            showHistory();
-        } else {
-            document.head.removeChild(document.head.querySelector('script#searchApi'));
-            let el = document.createElement("script");
-            el.id = 'searchApi'
-            el.src = `https://searchtip.kugou.com/getSearchTip?MusicTipCount=7&MVTipCount=0&albumcount=0&keyword=${keyword}&callback=searchCallback`
-            document.head.append(el);
-        }
-    }, wait);
-}
-// 搜索api
-
-let oSearch = document.getElementById("search");
-// 搜索输入框
-oSearch.onfocus = function () {
-    showSearchRecommend();
-    // 显示搜索结果
-
-    oSearch.onkeydown = ev => {
-        if (ev.key == 'Enter') {
-            oSearchBtn.onclick();
-            return false;
-        }
-    }
-    // 搜索框中输入回车搜索
-
-    oSearch.index = -1;
-    // 方向键控制选中
-
-    oSearch.select = (index) => {
-        let oList = document.getElementById("search_list");
-        Array.from(oList.children).forEach((el, cur) => {
-            el.classList.remove("active");
-            if (index == cur) {
-                el.classList.add("active");
-                oSearch.value = el.innerText;
-            }
-        });
-
-    }
-    // 选中函数
-
-    let _keydown = window.onkeydown;
-    // 记录全局的键盘事件
-
-    window.onkeydown = (ev) => {
-        let key = ev.key;
-        if (key == 'ArrowDown') {
-            let cur = ++oSearch.index;
-            cur == oList.children.length && (cur = 0);
-            oSearch.index = cur;
-            oSearch.select(cur);
-            return false;
-        }
-        if (key == 'ArrowUp') {
-            let cur = --oSearch.index;
-            cur == -1 && (cur = oList.children.length - 1);
-            oSearch.index = cur;
-            oSearch.select(cur);
-            return false;
-        }
-
-    };
-    // 获得焦点的键盘事件
-
-    oSearch.onblur = () => {
-        window.onkeydown = _keydown;
-        hideSearchRecommend()
-    }
-    // 失去焦点后把键盘事件还给全局并且把搜索结果隐藏
-
-
-    oSearch.timer = null;
-    oSearch.oninput = function () {
-        keyword = this.value;
-        oSearch.index = -1;
-        showSearchRecommend();
-        debounce();
-    }
-    // 键盘输入将选中的列表重置并且加载数据 
-}
-//搜索输入框获得焦点
-
-let oClear = document.getElementById("clear");
-oClear.onclick = function () {
-    localStorage.removeItem('records');
-}
-// 清除历史搜索记录
-
-
-let showHistory = () => {
-    let records = localStorage.records || '[]';
-    records = JSON.parse(records);
-    // 获取历史记录
-    if (!records.length) {
-        hideSearchRecommend();
-        return;
-    }
-    // 如果历史记录为空关闭搜索结果栏
-
-    renderSearchList(records)
-    // 加载搜索的数据
-
-    oClear.style.display = 'block';
-    let oSearchRecommend = document.getElementById('search_recommend');
-    oSearchRecommend.style.display = 'block';
-    // 显示搜索结果栏
-}
-// 显示清除历史搜索记录
-
-
-let hideHistory = () => {
-    let oClear = document.getElementById("clear");
-    oClear.style.display = 'none';
-    console.log('hide');
-}
-// 隐藏清除历史搜索记录
-
-
-let pushRecords = (record) => {
-    if (!record) return false;
-    let records = localStorage.records || '[]';
-    records = JSON.parse(records);
-    if (records.includes(record)) records = records.filter(el => record != el);;
-    records.length >= 7 && records.pop();
-    records.unshift(record);
-    records = JSON.stringify(records)
-    localStorage.setItem('records', records)
-}
-// 添加历史jilu
-
-let showSearchRecommend = (force) => {
-    let keyword = document.getElementById("search").value;
-    if (keyword == '') {
-        showHistory();
-        return false;
-    } else {
-        hideHistory();
-        let oSearchRecommend = document.getElementById('search_recommend');
-        oSearchRecommend.style.display = 'block';
-        debounce();
-    }
-}
-// 显示搜索结果栏
-
-let hideSearchRecommend = () => {
-    setTimeout(function () {
-        let oSearchRecommend = document.getElementById('search_recommend');
-        oSearchRecommend.style.display = 'none';
-    }, 100);
-    // 定时器关闭,不然直接隐藏会导致点击搜索功能失效
-}
-// 隐藏搜索结果栏
-
-let oList = document.getElementById("search_list");
-// 搜索结果的列表
-
-oList.onclick = ev => {
-    if (ev.target.tagName == 'LI') {
-        document.getElementById("search").value = ev.target.innerText;
-        oSearchBtn.onclick();
-    }
-}
-// 搜索结果的列表的事件事件委托写法
-
-
-let searchCallback = data => {
-    console.log('搜索了');
-    // if (!data.data.length) {
-    //     showHistory();
-    //     return;
-    // }
-    // 如果没有搜索到数据
-
-    if (!data.data[0].RecordCount) {
-        console.log('b');
-        hideSearchRecommend()
-        return;
-    }
-    // 搜索结果空
-    let { data: [{ RecordDatas }] } = data;
-    RecordDatas = RecordDatas.map(el => el.HintInfo);
-    renderSearchList(RecordDatas);
-    // 加载获取到的搜索结果
-}
-// 获取数据后会调用这个函数
-
-
-
-let renderSearchList = RecordDatas => {
-    let oList = document.getElementById("search_list");
-    oList.innerHTML = '';
-    let oFragment = document.createDocumentFragment();
-    RecordDatas.forEach(item => {
-        let HintInfo = item;
-        HintInfo = HintInfo.replace(keyword, str => `<span class='keyword'>${str}</span>`)
-        let oLi = document.createElement("li");
-        oLi.innerHTML = `${HintInfo}`
-        oFragment.appendChild(oLi);
-    });
-    oList.appendChild(oFragment)
-}
-// 加载获取到的搜索结果
-    </script>
-    <script>
     let parseTime = time => time >= 10 ? time : "0" + time;
 let byId = document.getElementById.bind(document);
 const baseurl = "";
@@ -980,10 +669,19 @@ oLrc.index = 0;
 oLrc.offset = 8;
 // 歌词偏移量
 
+let addMusicList = async (id, flag) => {
+    let { data } = await axios(`${baseurl}/play_url/${id}`);
+    let { pic, title, url, lkid } = data
+    let [singer, song] = title.replace(/\s/g, '').split('-');
+    pushMusicList({ url, pic, song, singer, lkid, id }, flag)
+    return false;
+};
+// 将选中的歌曲添加到列表 flag为true表示直接播放
 
 
 
-let musicList = [
+let musicList = sessionStorage.musicList || '[]' || [
+
     // {
     //     "id": "aGRuY3Zrd2s",
     //     "url": "https://lw-sycdn.kuwo.cn/a0028f2c19eebc38c67044d1bb16f35a/658c3c76/resource/30106/trackmedia/M500004HtbeG1hrKLv.mp3",
@@ -1008,6 +706,14 @@ let musicList = [
     // }
 
 ];
+musicList = JSON.parse(musicList);
+if (musicList.length == 0) {
+    if (location.hash) {
+        let id = location.hash.substring(1);
+        addMusicList(id, true);
+    }
+}
+
 let currentIndex = 0;
 
 
@@ -1049,15 +755,16 @@ let setSongName = songName => {
 //设置播放器歌曲名
 let play = () => {
     if (musicList.length == 0) {
+        byId("search").value = '';
         Toast("播放队列里没有歌曲,已经自动为你推荐热门歌曲", 2000);
         byId("search_btn").onclick()
         return false;
     }
     let isPlay = !oAudio.paused;
     if (isPlay) {
-        oAudio.pause()
+        oAudio.pause();
     } else {
-        oAudio.play()
+        oAudio.play();
     }
 }
 // 点击播放按钮
@@ -1080,21 +787,25 @@ let musicPlay = async (index) => {
     let { data: lrc } = await axios(`${baseurl}/lrc/${lkid}`);
     lrcList = lrc;
     renderLyrics(lrcList);
-    oLrc = byId('lrc');
-    oLrc.index = 0;
+    byId('lrc').index = 0;
     // next = 1;
-    let { data } = await axios(`${baseurl}/play_url/${id}`);
-    oAudio.src = data.url;
+    // let { data } = await axios(`${baseurl}/play_url/${id}`);
+
+    location.hash = `${id}`
+    // 便于分享
+
+    oAudio.src = url;
     setSongName(`${singer} - ${song}`);
     setAlbumImg(pic);
     currentIndex = index;
     updateMusicListCurrent();
-
+    oAudio.oncanplay = function () { }
     oAudio.play();
     oAudio.currentTime = 0.1;
 
 
 }
+
 
 let renderLyrics = (lrcList) => {
     oLrc.innerHTML = '';
@@ -1107,7 +818,7 @@ let renderLyrics = (lrcList) => {
 
 //播放音乐
 let nextSong = () => {
-    if (byId("mode").mode == true) {
+    if (byId("mode").mode) {
         musicPlay(currentIndex);
         return false;
     }
@@ -1118,7 +829,7 @@ let nextSong = () => {
 // 下一首
 
 let lastSong = () => {
-    if (byId("mode").mode == true) {
+    if (byId("mode").mode) {
         musicPlay(currentIndex)
         return false;
     }
@@ -1141,7 +852,7 @@ let updateMusicListData = () => {
     oMusicList.innerHTML = '';
     let html = ''
     musicList.forEach((info, index) => {
-        console.log(info);
+        // console.log(info);
         html += `<li class="item" >
         <ul style="display: flex;">
             <li style="width: 36px; text-align: center;">${index + 1}</li>
@@ -1213,8 +924,10 @@ let pushMusicList = (info, flag) => {
         musicPlay(currentIndex)
     } else {
         musicList.push(info);
+        Toast("添加成功", 1000);
     }
     updateMusicListData()
+    sessionStorage.setItem('musicList', JSON.stringify(musicList));
 }
 // 添加音乐到播放列表
 
@@ -1222,6 +935,8 @@ let pushMusicList = (info, flag) => {
 function del(index) {
 
     musicList.splice(index, 1);
+    sessionStorage.setItem('musicList', JSON.stringify(musicList));
+
     console.log(index, currentIndex);
     if (index < currentIndex) {
         --currentIndex
@@ -1252,6 +967,7 @@ oSearchConent.open = false;
 let showSearchContent = () => {
     oSearchConent.style.display = 'block';
     hidelrcBox();
+    console.log('aaaa');
 }
 let hideSearchContent = () => {
     oSearchConent.style.display = 'none';
@@ -1271,8 +987,430 @@ oAlbumImg.onclick = function () {
     }
     this.open = !this.open;
 }
+
+
+
+if (musicList.length) {
+    musicPlay(0);
+}
     </script>
-    <script src="./js/iconMouse.js"></script>
+    <script>
+    let keyword = '';
+// 搜索的关键字
+let oSearchBtn = byId("search_btn");
+// 搜索按钮
+
+oSearchBtn.keyword = Date.now();
+oSearchBtn.onclick = async function () {
+    // hideSearchRecommend();
+    showSearchContent()
+    byId('search_content').open = true
+    let keyword = byId("search").value;
+    if (oSearchBtn.keyword == keyword) {
+        console.log('过滤了重复搜索');
+        setTimeout(() => {
+            console.log('重置了');
+            oSearchBtn.keyword = Date.now();
+        }, 1000 * 5);
+        return false;
+    }
+    oSearchBtn.keyword = byId("search").value;
+    // 防止重复的关键字重复搜索
+
+
+    pushRecords(keyword);
+    // 关键字加入历史记录
+
+    byId("keyword").innerHTML = `"${keyword}"`;
+    if (!keyword) {
+        byId("keyword").innerHTML = `"热门"`;
+    };
+    // 搜索标题切换
+
+    let url = `${baseurl}/search/${keyword}`;
+    let { data } = await axios(url);
+
+    oListContent = byId("list_content");
+    oListContent.innerHTML = '';
+
+    let html = '';
+    data.forEach(({ song, id, singer, lkid }, index) => {
+        let str = `<li data-id="${id}">
+                    <ul>
+                        <li style="width: 84px;" class="center">${index + 1}</li>
+                        <li class="song" title="${song}">${song.replace(keyword, str => `<span class='keyword'>${str}</span>`)}</li>
+                        <li class="singer">${singer.replace(keyword, str => `<span class='keyword'>${str}</span>`)}</li>
+                        <li style="width: 160px;" class="operate center">
+                            <ul>
+                                <li><img src="./images/icon/play_b.png" alt="" class="play" title="播放"></li>
+                                <li><img src="./images/icon/add_b.png" alt="" class="add" title="添加到列表"></li>
+                                <li><img src="./images/icon/download.png" class="download" alt="" title="下载"></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>`
+        // 渲染数据 关键字高亮
+        html += str;
+
+    });
+    oListContent.innerHTML = html;
+    oListContent.download = async (id) => {
+        let { data: { url } } = await axios(`${baseurl}/play_url/${id}`);
+        download(url);
+    };
+    // 下载按钮对应的操作
+
+    oListContent.addMusicList = addMusicList(id,flag);
+    
+
+    for (let i = 0; i < byId('list_content').children.length; i++) {
+        const el = byId('list_content').children[i];
+        let { id } = el.dataset;
+
+        let oSong = el.querySelector('.song')
+        let oPlay = el.querySelector('.operate .play');
+        oSong.ondblclick = oPlay.onclick = () => {
+            oListContent.addMusicList(id, true)
+        };
+        // 直接播放
+
+        let oAdd = el.querySelector('.operate .add');
+        oAdd.onclick = () => {
+            oListContent.addMusicList(id)
+        }
+        // 添加列表
+
+        let oDownload = el.querySelector('.operate .download');
+        oDownload.onclick = () => {
+            oListContent.download(id);
+        };
+        // 下载按钮
+
+    }
+    // 给歌曲列表添加事件
+}
+// 搜索按钮点击事件
+
+let debounce = function () {
+    let wait = 500
+    clearTimeout(oSearch.timer);
+    oSearch.timer = setTimeout(() => {
+        keyword = byId("search").value;
+        if (keyword == '') {
+            showHistory();
+        } else {
+            document.head.removeChild(document.head.querySelector('script#searchApi'));
+            let el = document.createElement("script");
+            el.id = 'searchApi'
+            el.src = `https://searchtip.kugou.com/getSearchTip?MusicTipCount=7&MVTipCount=0&albumcount=0&keyword=${keyword}&callback=searchCallback`
+            document.head.append(el);
+        }
+    }, wait);
+}
+// 搜索api
+
+let oSearch = byId("search");
+// 搜索输入框
+oSearch.onfocus = function () {
+    showSearchRecommend();
+    // 显示搜索结果
+
+    oSearch.onkeydown = ev => {
+        if (ev.key == 'Enter') {
+            oSearchBtn.onclick();
+            return false;
+        }
+    }
+    // 搜索框中输入回车搜索
+
+    oSearch.index = -1;
+    // 方向键控制选中
+
+    oSearch.select = (index) => {
+        let oList = byId("search_list");
+        Array.from(oList.children).forEach((el, cur) => {
+            el.classList.remove("active");
+            if (index == cur) {
+                el.classList.add("active");
+                oSearch.value = el.innerText;
+            }
+        });
+
+    }
+    // 选中函数
+
+    let _keydown = window.onkeydown;
+    // 记录全局的键盘事件
+
+    window.onkeydown = (ev) => {
+        let key = ev.key;
+        if (key == 'ArrowDown') {
+            let cur = ++oSearch.index;
+            cur == oList.children.length && (cur = 0);
+            oSearch.index = cur;
+            oSearch.select(cur);
+            return false;
+        }
+        if (key == 'ArrowUp') {
+            let cur = --oSearch.index;
+            cur == -1 && (cur = oList.children.length - 1);
+            oSearch.index = cur;
+            oSearch.select(cur);
+            return false;
+        }
+
+    };
+    // 获得焦点的键盘事件
+
+    oSearch.onblur = () => {
+        window.onkeydown = _keydown;
+        hideSearchRecommend()
+    }
+    // 失去焦点后把键盘事件还给全局并且把搜索结果隐藏
+
+
+    oSearch.timer = null;
+    oSearch.oninput = function () {
+        keyword = this.value;
+        oSearch.index = -1;
+        showSearchRecommend();
+        debounce();
+    }
+    // 键盘输入将选中的列表重置并且加载数据 
+}
+//搜索输入框获得焦点
+
+let oClear = byId("clear");
+oClear.onclick = function () {
+    localStorage.removeItem('records');
+}
+// 清除历史搜索记录
+
+
+let showHistory = () => {
+    let records = localStorage.records || '[]';
+    records = JSON.parse(records);
+    // 获取历史记录
+    if (!records.length) {
+        hideSearchRecommend();
+        return;
+    }
+    // 如果历史记录为空关闭搜索结果栏
+
+    renderSearchList(records)
+    // 加载搜索的数据
+
+    oClear.style.display = 'block';
+    let oSearchRecommend = byId('search_recommend');
+    oSearchRecommend.style.display = 'block';
+    // 显示搜索结果栏
+}
+// 显示清除历史搜索记录
+
+
+let hideHistory = () => {
+    let oClear = byId("clear");
+    oClear.style.display = 'none';
+    console.log('hide');
+}
+// 隐藏清除历史搜索记录
+
+
+let pushRecords = (record) => {
+    if (!record) return false;
+    let records = localStorage.records || '[]';
+    records = JSON.parse(records);
+    if (records.includes(record)) records = records.filter(el => record != el);;
+    records.length >= 7 && records.pop();
+    records.unshift(record);
+    records = JSON.stringify(records)
+    localStorage.setItem('records', records)
+}
+// 添加历史记录
+
+let showSearchRecommend = (force) => {
+    let keyword = byId("search").value;
+    if (keyword == '') {
+        showHistory();
+        return false;
+    } else {
+        hideHistory();
+        let oSearchRecommend = byId('search_recommend');
+        oSearchRecommend.style.display = 'block';
+        debounce();
+    }
+}
+// 显示搜索结果栏
+
+let hideSearchRecommend = () => {
+    setTimeout(function () {
+        let oSearchRecommend = byId('search_recommend');
+        oSearchRecommend.style.display = 'none';
+    }, 300);
+    // 定时器关闭,不然直接隐藏会导致点击搜索功能失效
+}
+// 隐藏搜索结果栏
+
+let oList = byId("search_list");
+// 搜索结果的列表
+
+oList.onclick = ev => {
+    if (ev.target.tagName == 'LI') {
+        byId("search").value = ev.target.innerText;
+        oSearchBtn.onclick();
+    }
+}
+// 搜索结果的列表的事件事件委托写法
+
+
+let searchCallback = data => {
+    console.log('搜索了');
+    // if (!data.data.length) {
+    //     showHistory();
+    //     return;
+    // }
+    // 如果没有搜索到数据
+
+    if (!data.data[0].RecordCount) {
+        console.log('b');
+        hideSearchRecommend()
+        return;
+    }
+    // 搜索结果空
+    let { data: [{ RecordDatas }] } = data;
+    RecordDatas = RecordDatas.map(el => el.HintInfo);
+    renderSearchList(RecordDatas);
+    // 加载获取到的搜索结果
+}
+// 获取数据后会调用这个函数
+
+
+
+let renderSearchList = RecordDatas => {
+    let oList = byId("search_list");
+    oList.innerHTML = '';
+    let oFragment = document.createDocumentFragment();
+    RecordDatas.forEach(item => {
+        let HintInfo = item;
+        HintInfo = HintInfo.replace(keyword, str => `<span class='keyword'>${str}</span>`)
+        let oLi = document.createElement("li");
+        oLi.innerHTML = `${HintInfo}`
+        oFragment.appendChild(oLi);
+    });
+    oList.appendChild(oFragment)
+}
+// 加载获取到的搜索结果
+    </script>
+    <script>
+    let icons = Array.from(document.querySelectorAll('.icon'));
+let flag = 'a_'
+icons.forEach(el => {
+    el.addEventListener("mouseover", function () {
+        let src = this.src
+        let index = src.lastIndexOf("/") + 1
+        let start = src.substring(0, index);
+        let end = src.substring(index);
+        this.src = `${start}${flag}${end}`
+    })
+    el.addEventListener('mouseout', function () {
+        let src = this.src
+        this.src = src.replace(flag, '')
+    })
+})
+//鼠标移入和移出icon
+
+let oBar = byId("bar");
+oBar.onclick = function (ev) {
+    let maxWidth = oBar.offsetWidth;
+    let left = oBar.offsetLeft;
+    let coordinate = ev.clientX;
+    let progress = (coordinate - left) / maxWidth * 100
+    byId('playbar-playhead').style.width = progress + '%';
+    oAudio.currentTime = oAudio.duration * (progress / 100)
+}
+//进度条事件
+
+
+
+
+
+
+byId('play').onclick = play
+//播放按钮
+
+byId('nextSong').onclick = nextSong
+byId('lastSong').onclick = lastSong
+//上一首和下一首
+
+
+byId("download").onclick = () => { download(oAudio.src) }
+//下载按钮
+
+
+oMode = byId("mode")
+oMode.mode = Boolean(localStorage.mode);
+if (oMode.mode) { oMode.src = './images/icon/once.png'; } else { oMode.src = './images/icon/sequence.png' }
+// 进去的时候同步上一次的状态
+oMode.calibrate = function (quiet) {
+    if (this.mode) {
+        this.src = './images/icon/sequence.png'
+        Toast('当前模式:顺序播放', 2000);
+        localStorage.setItem('mode', '');
+    } else {
+        this.src = './images/icon/once.png';
+        Toast('当前模式:单曲循环', 2000);
+        localStorage.setItem('mode', 'true');
+    }
+    this.mode = !this.mode;
+}
+//切换模式
+
+
+
+// mode = false表示随机播放 mode = true 表示单曲循环
+byId("mode").onclick = () => {
+    oMode.calibrate(false)
+};
+//切换模式按钮
+
+byId('list-btn').open = false;
+
+byId('list-btn').onclick = function () {
+    this.open ? hideMusicList() : showMusicList()
+}
+
+byId("hideMusicList").onclick = hideMusicList
+//播放列表
+
+
+byId('showHide_playbar').onclick = function () {
+    let closed = byId("player").style.bottom == '-80px';
+    if (closed) {
+        openPlayer();
+        this.src = './images/icon/down.png';
+    } else {
+        closePlayer();
+        this.src = './images/icon/up.png';
+    }
+}
+//播放器的显示隐藏
+
+
+let oListBtn = byId("list-btn");
+let bg = byId("musicList-bg");
+bg.style.left = oListBtn.offsetLeft - 480 + oListBtn.offsetWidth + 'px';
+// 播放列表的定位
+
+setSongName('酷狗音乐 - 就是歌多');
+setAlbumImg("https://www.kugou.com/yy/static/images/play/default.jpg");
+
+// byId('list-btn').onclick();
+// showMusicList();
+// closePlayer()
+updateMusicListData();
+
+
+    </script>
     <script>
     window.onkeydown = keydown
 function keydown(ev) {
@@ -1370,6 +1508,8 @@ oAudio.ondurationchange = function () {
     byId("all-time").innerHTML = `${minute}:${second}`;
 }
 //当切歌，音乐总时长发生变化
+
+
 
     </script>
 </body>

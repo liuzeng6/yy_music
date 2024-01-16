@@ -2,7 +2,7 @@ const express = require("express");
 const axios = require("axios");
 const static = require("express-static");
 const { JSDOM } = require("jsdom");
-// const parseLyrics = require("./parseLyrics");
+
 let app = express();
 let port = process.argv[2] || 8080;
 
@@ -34,12 +34,20 @@ app.get('/search/', async (req, res) => {
 })
 app.get("/search/:q", async (req, res) => {
 
-    let { token, user } = req.query
-    let str = Buffer.from((new Date).toGMTString() + 'liu').toString('base64')
-    if (str != token) {
+    let { token, user } = req.query;
+    let tokenList = [];
+
+    let offset = 5;
+    for (let i = offset - 1; i >= -1; i--) {
+        let time = (new Date(Date.now() - 1000 * i)).toGMTString();
+        // console.log(time);
+        tokenList.push(Buffer.from(time + 'liu').toString('base64'))
+    }
+    if (!tokenList.includes(token)) {
         if (user != 'liu') {
             res.send("你小子是不是想偷数据");
             console.log("有人偷数据了");
+            console.log(Buffer.from(token, 'base64').toString(), (new Date()).toGMTString());
             return false;
         }
     }
@@ -117,25 +125,16 @@ app.get('/lrc/:lkid', async (req, res) => {
     res.send(lyrics)
 });
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + "/client/" + "index.html")
+    if (req.headers['user-agent'].includes('Windows')) {
+        res.sendFile(__dirname + "/client/" + "pc.html")
+    } else {
+        res.sendFile(__dirname + "/client/" + "index.html")
+    }
 })
+
+
+
 app.use(static("./client"))
 app.listen(port, () => {
     console.log(`你的服务开启在${port}上`);
 })
-
-
-
-
-
-// < script id = "de" >
-//     md = (url) => {
-//         let token = btoa(((new Date).toGMTString()) + 'liu');
-//         return `${url}?token=${token}`;
-//     }
-//     </script >
-// <script>
-//     let str = document.getElementById("de").innerText.split('');
-//         str = str.map(ch=>ch.charCodeAt()).join(',');
-//     console.log(str);
-// </script>

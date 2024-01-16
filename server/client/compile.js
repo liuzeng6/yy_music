@@ -17,8 +17,8 @@ const minify = (data) => {
 
 let html = fs.readFileSync("./player.html").toString();
 /* <script src="./js/player.js"></script> */
-html = html.replace(/\<script src="\.\/js\/[a-z]+\.js"\>\<\/script\>/gs, str => {
-    let [path] = str.match(/[a-z]+\.js/gs);
+html = html.replace(/\<script src="\.\/js\/[a-zA-Z]+\.js"\>\<\/script\>/gs, str => {
+    let [path] = str.match(/[a-zA-Z]+\.js/gs);
     return `<script>
     ${fs.readFileSync("./js/" + path).toString()}
     </script>`;

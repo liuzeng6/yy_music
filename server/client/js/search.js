@@ -1,14 +1,14 @@
 let keyword = '';
 // 搜索的关键字
-let oSearchBtn = document.getElementById("search_btn");
+let oSearchBtn = byId("search_btn");
 // 搜索按钮
 
 oSearchBtn.keyword = Date.now();
 oSearchBtn.onclick = async function () {
     // hideSearchRecommend();
-    byId('search_content').style.display = "block";
+    showSearchContent()
     byId('search_content').open = true
-    let keyword = document.getElementById("search").value;
+    let keyword = byId("search").value;
     if (oSearchBtn.keyword == keyword) {
         console.log('过滤了重复搜索');
         setTimeout(() => {
@@ -17,23 +17,23 @@ oSearchBtn.onclick = async function () {
         }, 1000 * 5);
         return false;
     }
-    oSearchBtn.keyword = document.getElementById("search").value;
+    oSearchBtn.keyword = byId("search").value;
     // 防止重复的关键字重复搜索
 
 
     pushRecords(keyword);
     // 关键字加入历史记录
 
-    document.getElementById("keyword").innerHTML = `"${keyword}"`;
+    byId("keyword").innerHTML = `"${keyword}"`;
     if (!keyword) {
-        document.getElementById("keyword").innerHTML = `"热门"`;
+        byId("keyword").innerHTML = `"热门"`;
     };
     // 搜索标题切换
 
     let url = `${baseurl}/search/${keyword}`;
     let { data } = await axios(url);
 
-    oListContent = document.getElementById("list_content");
+    oListContent = byId("list_content");
     oListContent.innerHTML = '';
 
     let html = '';
@@ -57,23 +57,17 @@ oSearchBtn.onclick = async function () {
 
     });
     oListContent.innerHTML = html;
-    oListContent.download = async () => {
+    oListContent.download = async (id) => {
         let { data: { url } } = await axios(`${baseurl}/play_url/${id}`);
         download(url);
     };
     // 下载按钮对应的操作
 
-    oListContent.addMusicList = async (id, flag) => {
-        let { data } = await axios(`${baseurl}/play_url/${id}`);
-        let { pic, title, url, lkid } = data
-        let [singer, song] = title.replace(/\s/g, '').split('-');
-        pushMusicList({ url, pic, song, singer, lkid, id }, flag)
-        return false;
-    };
-    // 将选中的歌曲添加到列表 flag为true表示直接播放
+    oListContent.addMusicList = addMusicList(id,flag);
+    
 
-    for (let i = 0; i < document.getElementById('list_content').children.length; i++) {
-        const el = document.getElementById('list_content').children[i];
+    for (let i = 0; i < byId('list_content').children.length; i++) {
+        const el = byId('list_content').children[i];
         let { id } = el.dataset;
 
         let oSong = el.querySelector('.song')
@@ -90,7 +84,9 @@ oSearchBtn.onclick = async function () {
         // 添加列表
 
         let oDownload = el.querySelector('.operate .download');
-        oDownload.onclick = oListContent.download;
+        oDownload.onclick = () => {
+            oListContent.download(id);
+        };
         // 下载按钮
 
     }
@@ -102,7 +98,7 @@ let debounce = function () {
     let wait = 500
     clearTimeout(oSearch.timer);
     oSearch.timer = setTimeout(() => {
-        keyword = document.getElementById("search").value;
+        keyword = byId("search").value;
         if (keyword == '') {
             showHistory();
         } else {
@@ -116,7 +112,7 @@ let debounce = function () {
 }
 // 搜索api
 
-let oSearch = document.getElementById("search");
+let oSearch = byId("search");
 // 搜索输入框
 oSearch.onfocus = function () {
     showSearchRecommend();
@@ -134,7 +130,7 @@ oSearch.onfocus = function () {
     // 方向键控制选中
 
     oSearch.select = (index) => {
-        let oList = document.getElementById("search_list");
+        let oList = byId("search_list");
         Array.from(oList.children).forEach((el, cur) => {
             el.classList.remove("active");
             if (index == cur) {
@@ -187,7 +183,7 @@ oSearch.onfocus = function () {
 }
 //搜索输入框获得焦点
 
-let oClear = document.getElementById("clear");
+let oClear = byId("clear");
 oClear.onclick = function () {
     localStorage.removeItem('records');
 }
@@ -208,7 +204,7 @@ let showHistory = () => {
     // 加载搜索的数据
 
     oClear.style.display = 'block';
-    let oSearchRecommend = document.getElementById('search_recommend');
+    let oSearchRecommend = byId('search_recommend');
     oSearchRecommend.style.display = 'block';
     // 显示搜索结果栏
 }
@@ -216,7 +212,7 @@ let showHistory = () => {
 
 
 let hideHistory = () => {
-    let oClear = document.getElementById("clear");
+    let oClear = byId("clear");
     oClear.style.display = 'none';
     console.log('hide');
 }
@@ -233,16 +229,16 @@ let pushRecords = (record) => {
     records = JSON.stringify(records)
     localStorage.setItem('records', records)
 }
-// 添加历史jilu
+// 添加历史记录
 
 let showSearchRecommend = (force) => {
-    let keyword = document.getElementById("search").value;
+    let keyword = byId("search").value;
     if (keyword == '') {
         showHistory();
         return false;
     } else {
         hideHistory();
-        let oSearchRecommend = document.getElementById('search_recommend');
+        let oSearchRecommend = byId('search_recommend');
         oSearchRecommend.style.display = 'block';
         debounce();
     }
@@ -251,19 +247,19 @@ let showSearchRecommend = (force) => {
 
 let hideSearchRecommend = () => {
     setTimeout(function () {
-        let oSearchRecommend = document.getElementById('search_recommend');
+        let oSearchRecommend = byId('search_recommend');
         oSearchRecommend.style.display = 'none';
-    }, 100);
+    }, 300);
     // 定时器关闭,不然直接隐藏会导致点击搜索功能失效
 }
 // 隐藏搜索结果栏
 
-let oList = document.getElementById("search_list");
+let oList = byId("search_list");
 // 搜索结果的列表
 
 oList.onclick = ev => {
     if (ev.target.tagName == 'LI') {
-        document.getElementById("search").value = ev.target.innerText;
+        byId("search").value = ev.target.innerText;
         oSearchBtn.onclick();
     }
 }
@@ -294,7 +290,7 @@ let searchCallback = data => {
 
 
 let renderSearchList = RecordDatas => {
-    let oList = document.getElementById("search_list");
+    let oList = byId("search_list");
     oList.innerHTML = '';
     let oFragment = document.createDocumentFragment();
     RecordDatas.forEach(item => {

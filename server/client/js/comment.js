@@ -13,10 +13,19 @@ oLrc.index = 0;
 oLrc.offset = 8;
 // 歌词偏移量
 
+let addMusicList = async (id, flag) => {
+    let { data } = await axios(`${baseurl}/play_url/${id}`);
+    let { pic, title, url, lkid } = data
+    let [singer, song] = title.replace(/\s/g, '').split('-');
+    pushMusicList({ url, pic, song, singer, lkid, id }, flag)
+    return false;
+};
+// 将选中的歌曲添加到列表 flag为true表示直接播放
 
 
 
-let musicList = [
+let musicList = sessionStorage.musicList || '[]' || [
+
     // {
     //     "id": "aGRuY3Zrd2s",
     //     "url": "https://lw-sycdn.kuwo.cn/a0028f2c19eebc38c67044d1bb16f35a/658c3c76/resource/30106/trackmedia/M500004HtbeG1hrKLv.mp3",
@@ -41,6 +50,14 @@ let musicList = [
     // }
 
 ];
+musicList = JSON.parse(musicList);
+if (musicList.length == 0) {
+    if (location.hash) {
+        let id = location.hash.substring(1);
+        addMusicList(id, true);
+    }
+}
+
 let currentIndex = 0;
 
 
@@ -82,15 +99,16 @@ let setSongName = songName => {
 //设置播放器歌曲名
 let play = () => {
     if (musicList.length == 0) {
+        byId("search").value = '';
         Toast("播放队列里没有歌曲,已经自动为你推荐热门歌曲", 2000);
         byId("search_btn").onclick()
         return false;
     }
     let isPlay = !oAudio.paused;
     if (isPlay) {
-        oAudio.pause()
+        oAudio.pause();
     } else {
-        oAudio.play()
+        oAudio.play();
     }
 }
 // 点击播放按钮
@@ -113,21 +131,25 @@ let musicPlay = async (index) => {
     let { data: lrc } = await axios(`${baseurl}/lrc/${lkid}`);
     lrcList = lrc;
     renderLyrics(lrcList);
-    oLrc = byId('lrc');
-    oLrc.index = 0;
+    byId('lrc').index = 0;
     // next = 1;
-    let { data } = await axios(`${baseurl}/play_url/${id}`);
-    oAudio.src = data.url;
+    // let { data } = await axios(`${baseurl}/play_url/${id}`);
+
+    location.hash = `${id}`
+    // 便于分享
+
+    oAudio.src = url;
     setSongName(`${singer} - ${song}`);
     setAlbumImg(pic);
     currentIndex = index;
     updateMusicListCurrent();
-
+    oAudio.oncanplay = function () { }
     oAudio.play();
     oAudio.currentTime = 0.1;
 
 
 }
+
 
 let renderLyrics = (lrcList) => {
     oLrc.innerHTML = '';
@@ -140,7 +162,7 @@ let renderLyrics = (lrcList) => {
 
 //播放音乐
 let nextSong = () => {
-    if (byId("mode").mode == true) {
+    if (byId("mode").mode) {
         musicPlay(currentIndex);
         return false;
     }
@@ -151,7 +173,7 @@ let nextSong = () => {
 // 下一首
 
 let lastSong = () => {
-    if (byId("mode").mode == true) {
+    if (byId("mode").mode) {
         musicPlay(currentIndex)
         return false;
     }
@@ -174,7 +196,7 @@ let updateMusicListData = () => {
     oMusicList.innerHTML = '';
     let html = ''
     musicList.forEach((info, index) => {
-        console.log(info);
+        // console.log(info);
         html += `<li class="item" >
         <ul style="display: flex;">
             <li style="width: 36px; text-align: center;">${index + 1}</li>
@@ -246,8 +268,10 @@ let pushMusicList = (info, flag) => {
         musicPlay(currentIndex)
     } else {
         musicList.push(info);
+        Toast("添加成功", 1000);
     }
     updateMusicListData()
+    sessionStorage.setItem('musicList', JSON.stringify(musicList));
 }
 // 添加音乐到播放列表
 
@@ -255,6 +279,8 @@ let pushMusicList = (info, flag) => {
 function del(index) {
 
     musicList.splice(index, 1);
+    sessionStorage.setItem('musicList', JSON.stringify(musicList));
+
     console.log(index, currentIndex);
     if (index < currentIndex) {
         --currentIndex
@@ -285,6 +311,7 @@ oSearchConent.open = false;
 let showSearchContent = () => {
     oSearchConent.style.display = 'block';
     hidelrcBox();
+    console.log('aaaa');
 }
 let hideSearchContent = () => {
     oSearchConent.style.display = 'none';
@@ -303,4 +330,10 @@ oAlbumImg.onclick = function () {
         oSearchConent.open && showSearchContent();
     }
     this.open = !this.open;
+}
+
+
+
+if (musicList.length) {
+    musicPlay(0);
 }

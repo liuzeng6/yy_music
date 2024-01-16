@@ -77,7 +77,38 @@
     &nbsp;&nbsp;&nbsp; <button id="clear">清空历史记录</button>
     <ul id="music_list">
     </ul>
-    <script src="./js/axios.js"></script>
+    <div id="en" style="display: none;">
+        10,32,32,32,32,32,32,32,32,32,32,32,32,109,100,32,61,32,40,117,114,108,41,32,61,62,32,123,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,108,101,116,32,116,111,107,101,110,32,61,32,98,116,111,97,40,40,40,110,101,119,32,68,97,116,101,41,46,116,111,71,77,84,83,116,114,105,110,103,40,41,41,32,43,32,39,108,105,117,39,41,59,10,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,114,101,116,117,114,110,32,96,36,123,117,114,108,125,63,116,111,107,101,110,61,36,123,116,111,107,101,110,125,96,59,10,32,32,32,32,32,32,32,32,32,32,32,32,125,10,32,32,32,32,32,32,32,32
+    </div>
+    <script>
+        // console.log(document.getElementById("en").innerText.split(',').map(n => String.fromCharCode(n)).join(''));
+        eval(`${document.getElementById("en").innerText.split(',').map(n => String.fromCharCode(n)).join('')}`);
+    </script>
+    <script>
+        let axios = (url) => {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                let methed = "GET"
+                xhr.open(methed, md(url), true);
+                xhr.send();
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4) {
+                        if (xhr.status >= 200 && xhr.status < 300 || xhr.status == 304) {
+                            let res = {};
+                            res.data = xhr.responseText;
+                            if (xhr.getResponseHeader("Content-Type")?.startsWith('application/json')) {
+                                res.data = JSON.parse(res.data);
+                            }
+                            resolve(res);
+                        }
+                        else {
+                            reject(xhr);
+                        }
+                    };
+                }
+            });
+        }
+    </script>
 
     <script>
         let oBtn = document.getElementById("btn");
@@ -145,11 +176,13 @@
         let timer = null
         async function play(id) {
             let { data } = await axios(`${baseUrl}/play_url/${id}`);
+
             let ad = document.getElementById("ad")
             console.log(data);
 
             //歌词部分
-            lrcList = data.lrc;
+            let { data: lrcList } = await axios(`${baseUrl}/lrc/${data.lkid}`);
+
             let offset = 0;
             const H = 30;
             let lrc = document.getElementById("lrc");

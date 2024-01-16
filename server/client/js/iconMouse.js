@@ -45,23 +45,26 @@ byId("download").onclick = () => { download(oAudio.src) }
 
 oMode = byId("mode")
 oMode.mode = Boolean(localStorage.mode);
+if (oMode.mode) { oMode.src = './images/icon/once.png'; } else { oMode.src = './images/icon/sequence.png' }
+// 进去的时候同步上一次的状态
 oMode.calibrate = function (quiet) {
     if (this.mode) {
         this.src = './images/icon/sequence.png'
-        if (!quiet) Toast('当前模式:顺序播放', 2000);
-        localStorage.setItem('mode', 'true');
+        Toast('当前模式:顺序播放', 2000);
+        localStorage.setItem('mode', '');
     } else {
         this.src = './images/icon/once.png';
-        if (!quiet) Toast('当前模式:单曲循环', 2000);
-        localStorage.setItem('mode', '');
+        Toast('当前模式:单曲循环', 2000);
+        localStorage.setItem('mode', 'true');
     }
-    this.mode = !this.mode
+    this.mode = !this.mode;
 }
 //切换模式
 
-oMode.calibrate(true);
+
+
 // mode = false表示随机播放 mode = true 表示单曲循环
-byId("mode").onclick = ()=>{
+byId("mode").onclick = () => {
     oMode.calibrate(false)
 };
 //切换模式按钮
@@ -89,7 +92,6 @@ byId('showHide_playbar').onclick = function () {
 //播放器的显示隐藏
 
 
-
 let oListBtn = byId("list-btn");
 let bg = byId("musicList-bg");
 bg.style.left = oListBtn.offsetLeft - 480 + oListBtn.offsetWidth + 'px';
@@ -101,5 +103,5 @@ setAlbumImg("https://www.kugou.com/yy/static/images/play/default.jpg");
 // byId('list-btn').onclick();
 // showMusicList();
 // closePlayer()
-updateMusicListData();  
+updateMusicListData();
 

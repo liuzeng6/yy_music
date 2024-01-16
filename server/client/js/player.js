@@ -85,3 +85,5 @@ oAudio.ondurationchange = function () {
     byId("all-time").innerHTML = `${minute}:${second}`;
 }
 //当切歌，音乐总时长发生变化
+
+
