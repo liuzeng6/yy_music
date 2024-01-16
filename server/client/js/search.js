@@ -63,8 +63,8 @@ oSearchBtn.onclick = async function () {
     };
     // 下载按钮对应的操作
 
-    oListContent.addMusicList = addMusicList(id,flag);
     
+    oListContent.addMusicList = addMusicList;
 
     for (let i = 0; i < byId('list_content').children.length; i++) {
         const el = byId('list_content').children[i];
