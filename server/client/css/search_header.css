@@ -7,6 +7,12 @@
     position: relative;
 }
 
+@media screen and (max-width:500px) {
+    #search_header {
+        width: 1000px;
+    }
+}
+
 #search_header .keyword {
     color: #14a9ff;
 }

@@ -50,12 +50,30 @@ let musicList = sessionStorage.musicList || '[]' || [
     // }
 
 ];
+
+let getId = () => location.hash.substring(1)
+
 musicList = JSON.parse(musicList);
 if (musicList.length == 0) {
+    // console.log("歌单里面没有歌");
     if (location.hash) {
-        let id = location.hash.substring(1);
+        let id = getId()
         addMusicList(id, true);
     }
+} else {
+    if (location.hash) {
+        let id = getId();
+        if (musicList.map(el => el.id).includes(id)) {
+            window.onload = function () {
+                musicPlay(currentIndex);
+            }
+            // console.log("歌单里面已经存在了，一般是主动刷新了");
+        } else {
+            addMusicList(id, true);
+            // console.log("歌单里面还没有，一般是打开了一个新的链接");
+        }
+    }
+
 }
 
 let currentIndex = 0;
@@ -293,10 +311,6 @@ function del(index) {
 }
 // 删除列表中的歌曲
 
-window.onload = function () {
-    // musicPlay(currentIndex);
-}
-
 
 let showlrcBox = () => {
     byId("lrc-box").style.display = 'block';
@@ -332,8 +346,3 @@ oAlbumImg.onclick = function () {
     this.open = !this.open;
 }
 
-
-
-if (musicList.length) {
-    musicPlay(0);
-}
