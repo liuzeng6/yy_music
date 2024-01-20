@@ -6,17 +6,21 @@ let oSearchBtn = byId("search_btn");
 oSearchBtn.keyword = Date.now();
 oSearchBtn.onclick = async function () {
     // hideSearchRecommend();
+    // console.log('拱拱');
     showSearchContent()
     byId('search_content').open = true
     let keyword = byId("search").value;
     if (oSearchBtn.keyword == keyword) {
         console.log('过滤了重复搜索');
-        setTimeout(() => {
-            console.log('重置了');
-            oSearchBtn.keyword = Date.now();
-        }, 1000 * 5);
         return false;
     }
+
+    setTimeout(() => {
+        console.log('重置了');
+        oSearchBtn.keyword = Date.now();
+    }, 1000 * 5);
+    // 搜索之后重置
+
     oSearchBtn.keyword = byId("search").value;
     // 防止重复的关键字重复搜索
 
@@ -63,7 +67,7 @@ oSearchBtn.onclick = async function () {
     };
     // 下载按钮对应的操作
 
-    
+
     oListContent.addMusicList = addMusicList;
 
     for (let i = 0; i < byId('list_content').children.length; i++) {

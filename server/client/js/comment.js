@@ -314,10 +314,12 @@ function del(index) {
 
 let showlrcBox = () => {
     byId("lrc-box").style.display = 'block';
+    oAlbumImg.open = true;
 }
 
 let hidelrcBox = () => {
     byId("lrc-box").style.display = 'none';
+    oAlbumImg.open = false;
 }
 
 let oSearchConent = byId('search_content');
@@ -325,7 +327,7 @@ oSearchConent.open = false;
 let showSearchContent = () => {
     oSearchConent.style.display = 'block';
     hidelrcBox();
-    console.log('aaaa');
+    // console.log('aaaa');
 }
 let hideSearchContent = () => {
     oSearchConent.style.display = 'none';
@@ -343,6 +345,5 @@ oAlbumImg.onclick = function () {
         hidelrcBox();
         oSearchConent.open && showSearchContent();
     }
-    this.open = !this.open;
 }
 

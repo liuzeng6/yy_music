@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>提示</title>
+</head>
+<style>
+    * {
+        padding: 0px;
+        margin: 0px;
+    }
+
+    .notification {
+
+        width: 330px;
+        padding: 14px 26px 14px 13px;
+        border-radius: 8px;
+        box-sizing: border-box;
+        border: 1px solid #ebeef5;
+        position: fixed;
+        background-color: #fff;
+        box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .1);
+        transition: .5s all ease;
+        right: -330px;
+        top: 16px;
+        z-index: 999;
+    }
+
+    .notification .close {
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        cursor: pointer;
+        font-size: 20px;
+
+    }
+
+    .notification .title {
+        font-weight: 700;
+        font-size: 16px;
+        color: #303133;
+        margin: 0;
+    }
+
+    .notification .content {
+        font-size: 14px;
+        line-height: 21px;
+        margin: 6px 0 0;
+        color: #606266;
+    }
+</style>
+
+<body>
+    <div class="notification">
+        <h2 class="title">每日技巧</h2>
+        <div class="content">
+            <p>
+                大师出品,必属精品
+            </p>
+        </div>
+        <div class="close">×</div>
+    </div>
+</body>
+
+</html>

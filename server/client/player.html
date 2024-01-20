@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="./css/search_content.css">
 <link rel="stylesheet" href="./css/search_header.css">
 <link rel="stylesheet" href="./css/player.css">
+<link rel="stylesheet" href="./css/notification.css">
 <script>
     let axios = (url) => {
         return new Promise((resolve, reject) => {
@@ -52,6 +53,16 @@
 
 
 <body>
+
+    <div class="notification" id="notification">
+        <div class="group">
+            <h2 class="title">每日技巧</h2>
+            <div class="content">
+                大师出品，必属精品
+            </div>
+            <div class="close">×</div>
+        </div>
+    </div>
 
 
     <div id="search_header">
@@ -213,6 +224,7 @@
     <script src="./js/iconMouse.js"></script>
     <script src="./js/keyboard.js"></script>
     <script src="./js/player.js"></script>
+    <script src="./js/notification.js"></script>
 </body>
 
 </html>
