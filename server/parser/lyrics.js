@@ -1,10 +1,16 @@
 const axios = require("axios");
-module.exports = async (lkid) => {
-    let { data: { lrc: lyrics } } = await axios(`https://api.44h4.com/lc.php?cid=${lkid}`);
 
+module.exports = async (lkid) => {
+    let { data: lyrics } = await axios(`http://www.wxmp3.com/mp3/${lkid}.html`);
+    lyrics.match(/<pre class="aplayer-lrc-content">(.*)?<\/pre>/)
+    lyrics = RegExp.$1.split(' ');
     const parse = (lyrics) => {
+        lyrics = lyrics.filter(el => el);
+        lyrics.shift();
+        lyrics.shift();
+        // console.log(lyrics);
         let arr = [];
-        lyrics.replace(/ /g, '').split("\n").filter(el => el).map(el => {
+        lyrics.map(el => {
             el.replace(/\[.*?\]/g, str => {
                 let res = str.split('')
                 res.shift()
@@ -22,7 +28,7 @@ module.exports = async (lkid) => {
                 arr.push({ second, ly });
             })
         });
-        arr.shift()
+        // arr.shift()
         return arr;
     }
     return parse(lyrics);

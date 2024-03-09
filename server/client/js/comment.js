@@ -15,10 +15,15 @@ oLrc.offset = 8;
 
 let addMusicList = async (id, flag) => {
     let { data } = await axios(`${baseurl}/play_url/${id}`);
-    let { pic, title, url, lkid } = data
-    let [singer, song] = title.replace(/\s/g, '').split('-');
-    pushMusicList({ url, pic, song, singer, lkid, id }, flag)
-    return false;
+    let { pic, title, url, lkid, msg } = data;
+    console.log(msg);
+    if (msg) {
+        let [singer, song] = title.replace(/\s/g, '').split('-');
+        pushMusicList({ url, pic, song, singer, lkid, id }, flag);
+        return false;
+    } else {
+        Toast("VIP歌曲，播放失败", 2000);
+    }
 };
 // 将选中的歌曲添加到列表 flag为true表示直接播放
 

@@ -5,11 +5,10 @@ let popular = require("./parser/popular");
 let songList = require("./parser/songList");
 const lyrics = require("./parser/lyrics");
 const musicInfo = require("./parser/musicInfo");
-// const hot = require("./parser/hot");
-// const top = require("./parser/top");
 
+const searchRecord = require("./util/searchRecord");
 
-let { port: _port, attest, staticDir, cors} = require("./config");
+let { port: _port, attest, staticDir, cors } = require("./config");
 
 let app = express();
 let port = process.argv[2] || _port;
@@ -19,6 +18,10 @@ app.all("*", async (req, res, next) => {
     res.header("Access-Control-Request-Headers", cors);
     res.header("Access-Control-Request-Method", cors);
     await next();
+});
+
+app.get("/searchRecord", async (req, res) => {
+    res.send(searchRecord);
 })
 
 app.get('/search/', async (req, res) => {
@@ -28,18 +31,7 @@ app.get('/search/', async (req, res) => {
 })
 // 空值搜索返回2t58的热门歌单;
 
-// app.get("/search/8888", (req, res) => {
-//     res.sendFile(pathlib.resolve(__dirname, staticDir, "json/hot.json"));
-// });
-// app.get("/search/6666", (req, res) => {
-//     res.sendFile(pathlib.resolve(__dirname, staticDir, "json/top.json"));
-// });
-
 require("./middleware/playList")(app);
-
-
-// app.use()
-
 
 app.get("/search/:q", async (req, res) => {
 
@@ -50,7 +42,6 @@ app.get("/search/:q", async (req, res) => {
         let offset = 5;
         for (let i = offset - 1; i >= -1; i--) {
             let time = (new Date(Date.now() - 1000 * i)).toGMTString();
-            // console.log(time);
             tokenList.push(Buffer.from(time + 'liu').toString('base64'))
         }
         if (!tokenList.includes(token)) {
@@ -63,6 +54,7 @@ app.get("/search/:q", async (req, res) => {
         }
     }
     let q = req.params.q;
+    searchRecord.push(q);
     let music_list = await songList(q, 100);
     res.send(music_list)
 });

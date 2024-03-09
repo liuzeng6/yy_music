@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自定义播放器</title>
+    <title>yy音乐网</title>
     <script id="searchApi"></script>
 </head>
 <style>
@@ -730,10 +730,15 @@ oLrc.offset = 8;
 
 let addMusicList = async (id, flag) => {
     let { data } = await axios(`${baseurl}/play_url/${id}`);
-    let { pic, title, url, lkid } = data
-    let [singer, song] = title.replace(/\s/g, '').split('-');
-    pushMusicList({ url, pic, song, singer, lkid, id }, flag)
-    return false;
+    let { pic, title, url, lkid, msg } = data;
+    console.log(msg);
+    if (msg) {
+        let [singer, song] = title.replace(/\s/g, '').split('-');
+        pushMusicList({ url, pic, song, singer, lkid, id }, flag);
+        return false;
+    } else {
+        Toast("VIP歌曲，播放失败", 2000);
+    }
 };
 // 将选中的歌曲添加到列表 flag为true表示直接播放
 
@@ -1632,21 +1637,24 @@ oAudio.ondurationchange = function () {
     '输入8888搜索结果会是TOP榜单前30',
     '输入6666搜索结果会是热门榜单前30'
 ];
+// 提示配置
 console.log(tips.join('\n'));
-const oNotification = byId("notification");
 
+const oNotification = byId("notification");
 oNotification.setContent = (tip) => {
     oNotification.querySelector('.content').innerHTML = tip
 }
+// 设置提示文字
 oNotification.show = () => {
     oNotification.style.right = '16px';
 }
+// 显示提示
 oNotification.querySelector(".close").onclick = () => {
     oNotification.style.right = "-330px"
 }
+// 关闭提示
 
 oNotification.setContent(tips.join("<br>"));
-
 let memory = localStorage.getItem("memory") || 2;
 
 setTimeout(() => {
@@ -1660,7 +1668,7 @@ setTimeout(() => {
         }
     }
 }, 1000 * 30)
-
+// 每次提示之后会把提示频次提上去
 
 
 

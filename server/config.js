@@ -3,6 +3,6 @@ module.exports = {
     attest: false,
     staticDir: "./client",
     cors: "*",
-    playList: [6666, 8888],
+    playList: [],
     playListLength: 30,
 }
