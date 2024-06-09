@@ -25,11 +25,9 @@ app.get("/searchRecord", async (req, res) => {
 })
 
 app.get('/search/', async (req, res) => {
-
     let music_list = await popular();
     res.send(music_list);
 })
-// 空值搜索返回2t58的热门歌单;
 
 require("./middleware/playList")(app);
 
@@ -38,10 +36,10 @@ app.get("/search/:q", async (req, res) => {
     if (attest) {
         let { token, user } = req.query;
         let tokenList = [];
-
         let offset = 5;
         for (let i = offset - 1; i >= -1; i--) {
             let time = (new Date(Date.now() - 1000 * i)).toGMTString();
+            // console.log(time);
             tokenList.push(Buffer.from(time + 'liu').toString('base64'))
         }
         if (!tokenList.includes(token)) {

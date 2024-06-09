@@ -3,7 +3,7 @@ let oAudio = byId("audio");
 
 let oLrcBox = byId("lrc-box")
 oLrcBox.calibrate = function () {
-    console.log('bbb');
+    // console.log('bbb');
     let oPlayer = byId('player');
     let h = document.documentElement.clientHeight - 120;
     this.style.height = h + 'px';
