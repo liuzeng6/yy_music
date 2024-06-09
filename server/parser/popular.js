@@ -1,7 +1,7 @@
 const axios = require("axios");
 const { JSDOM } = require("jsdom");
 module.exports = async () => {
-    let { data } = await axios(`http://www.wxmp3.com/`);
+    let { data } = await axios(`http://www.2t58.com/`);
     let { document } = (new JSDOM(data)).window;
     let music_list = Array.from(document.querySelectorAll(".ilingkuplay_list ul li div.name a"))
     music_list = music_list.map(el => {

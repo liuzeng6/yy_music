@@ -3,8 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="msvalidate.01" content="387E8636DA6D5A820828DC4B0D08FFE4" />
+    <meta name="baidu-site-verification" content="codeva-8Cav4R2G04" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>yy音乐网</title>
+    <title>免费在线听音乐</title>
+    <meta name="keywords" content="播放器,在线音乐播放器,音乐下载器,网易云音乐,音乐api,音乐搜索,音乐搜索器,音乐试听,音乐在线听,QQ音乐下载,酷狗音乐下载,百度音乐下载">
+    <meta name="description" content="提供一站式在线音乐服务，音乐在线播放体验，具有音乐搜索、播放、下载、歌词同步显示、个人音乐播放列表等功能">
     <script id="searchApi"></script>
 </head>
 <style>
@@ -546,10 +550,11 @@
 
 
 <body>
+    <h1 style="position: absolute;top: -99999px;">免费听歌网站</h1>
 
     <div class="notification" id="notification">
         <div class="group">
-            <h2 class="title">每日技巧</h2>
+            <div class="title">每日技巧</div>
             <div class="content">
                 大师出品，必属精品
             </div>
@@ -677,7 +682,7 @@
             <div class="center">
                 <div class="albumImg">
                     <a href="javascript:">
-                        <img src="" alt="" width="100%" height="100%" id="albumImg">
+                        <img src="https://www.kugou.com/yy/static/images/play/default.jpg" alt="" width="100%" height="100%" id="albumImg">
                     </a>
                 </div>
                 <div class="controls-bar">
@@ -730,15 +735,10 @@ oLrc.offset = 8;
 
 let addMusicList = async (id, flag) => {
     let { data } = await axios(`${baseurl}/play_url/${id}`);
-    let { pic, title, url, lkid, msg } = data;
-    console.log(msg);
-    if (msg) {
-        let [singer, song] = title.replace(/\s/g, '').split('-');
-        pushMusicList({ url, pic, song, singer, lkid, id }, flag);
-        return false;
-    } else {
-        Toast("VIP歌曲，播放失败", 2000);
-    }
+    let { pic, title, url, lkid } = data
+    let [singer, song] = title.replace(/\s/g, '').split('-');
+    pushMusicList({ url, pic, song, singer, lkid, id }, flag)
+    return false;
 };
 // 将选中的歌曲添加到列表 flag为true表示直接播放
 
@@ -871,7 +871,11 @@ let musicPlay = async (index) => {
     renderLyrics(lrcList);
     byId('lrc').index = 0;
     // next = 1;
-    // let { data } = await axios(`${baseurl}/play_url/${id}`);
+
+    if(!url){
+        let { data } = await axios(`${baseurl}/play_url/${id}`);
+        url = data.url;
+    }
 
     location.hash = `${id}`
     // 便于分享

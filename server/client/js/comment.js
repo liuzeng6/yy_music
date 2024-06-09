@@ -15,15 +15,10 @@ oLrc.offset = 8;
 
 let addMusicList = async (id, flag) => {
     let { data } = await axios(`${baseurl}/play_url/${id}`);
-    let { pic, title, url, lkid, msg } = data;
-    console.log(msg);
-    if (msg) {
-        let [singer, song] = title.replace(/\s/g, '').split('-');
-        pushMusicList({ url, pic, song, singer, lkid, id }, flag);
-        return false;
-    } else {
-        Toast("VIP歌曲，播放失败", 2000);
-    }
+    let { pic, title, url, lkid } = data
+    let [singer, song] = title.replace(/\s/g, '').split('-');
+    pushMusicList({ url, pic, song, singer, lkid, id }, flag)
+    return false;
 };
 // 将选中的歌曲添加到列表 flag为true表示直接播放
 
@@ -156,7 +151,11 @@ let musicPlay = async (index) => {
     renderLyrics(lrcList);
     byId('lrc').index = 0;
     // next = 1;
-    // let { data } = await axios(`${baseurl}/play_url/${id}`);
+
+    if(!url){
+        let { data } = await axios(`${baseurl}/play_url/${id}`);
+        url = data.url;
+    }
 
     location.hash = `${id}`
     // 便于分享
