@@ -16,6 +16,7 @@ oLrc.offset = 8;
 let addMusicList = async (id, flag) => {
     let { data } = await axios(`${baseurl}/play_url/${id}`);
     let { pic, title, url, lkid, msg } = data;
+    console.log(msg);
     if (msg) {
         let [singer, song] = title.replace(/\s/g, '').split('-');
         pushMusicList({ url, pic, song, singer, lkid, id }, flag);
@@ -158,10 +159,7 @@ let musicPlay = async (index) => {
     byId('lrc').index = 0;
     // next = 1;
     // let { data } = await axios(`${baseurl}/play_url/${id}`);
-    if(!url){
-        let { data } = await axios(`${baseurl}/play_url/${id}`);
-        url = data.url;
-    }
+
     location.hash = `${id}`
     // 便于分享
 
