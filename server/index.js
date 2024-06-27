@@ -81,7 +81,7 @@ app.get('/', (req, res) => {
     if (req.headers['user-agent'].includes('Windows')) {
         res.sendFile(__dirname + "/client/" + "pc.html")
     } else {
-        res.sendFile(__dirname + "/client/" + "index.html")
+        res.sendFile(__dirname + "/client/" + "h5.html")
     }
 });
 // 访问主界面

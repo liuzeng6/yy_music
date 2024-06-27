@@ -1,43 +1,23 @@
-window.onkeydown = keydown
-function keydown(ev) {
+window.onkeydown = function(ev) { const keyMap = {
+    ' ': play,
+    'ArrowRight': nextSong,
+    'ArrowLeft': lastSong,
+    'Escape': () => oAlbumImg.onclick(),
+    'k': () => byId('search').focus()
+};
 
-    let rules = [
-        {
-            rule: ev.key == ' ',
-            operate: () => {
-                play();
-            }
-        },
-        {
-            rule: ev.key == "ArrowRight" && (ev.ctrlKey || ev.altKey),
-            operate: () => {
-                nextSong()
-            }
-        },
-        {
-            rule: ev.key == "ArrowLeft" && (ev.ctrlKey || ev.altKey),
-            operate: () => {
-                lastSong()
-            }
-        },
-        {
-            rule: ev.key == "Escape",
-            operate: () => {
-                oAlbumImg.onclick();
-            }
-        },
-        {
-            rule: ev.key == "k" && ev.ctrlKey,
-            operate: () => {
-                byId('search').focus();
-            }
-        }
-    ];
-    for (let i = 0; i < rules.length; i++) {
-        const el = rules[i];
-        if (el.rule) {
-            el.operate();
-            return false;
-        }
+const ctrlOrAltPressed = ev.ctrlKey || ev.altKey;
+const keyAction = keyMap[ev.key];
+
+if (keyAction) {
+    if ((ev.key === 'ArrowRight' || ev.key === 'ArrowLeft') && ctrlOrAltPressed) {
+        keyAction();
+    } else if (ev.key === 'k' && ctrlOrAltPressed) { keyAction();
+    } else if (ev.key === 'Escape') {
+        keyAction();
+    } else if (ev.key === ' ') {
+        keyAction();
     }
+    return false;
 }
+};
